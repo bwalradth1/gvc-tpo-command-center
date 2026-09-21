@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GVC TPO Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #0b1220;
+  --bg2: #111a2b;
+  --panel: #152033;
+  --panel2: #1a2740;
+  --border: #2a3b57;
+  --text: #e8eef8;
+  --muted: #8fa3c0;
+  --gold: #d4a84b;
+  --gold2: #f0c56d;
+  --navy: #1e3a5f;
+  --red: #e85d5d;
+  --green: #3ecf8e;
+  --blue: #5b8def;
+  --shadow: 0 8px 28px rgba(0,0,0,.35);
+  --radius: 10px;
+  --font: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: radial-gradient(1200px 600px at 10% -10%, #1a2a48 0%, var(--bg) 55%);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+#app { min-height: 100%; display: flex; flex-direction: column; }
+.topbar {
+  display: grid;
+  grid-template-columns: 240px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 18px;
+  background: rgba(11,18,32,.92);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20;
+  backdrop-filter: blur(8px);
+}
+.brand { display: flex; gap: 10px; align-items: center; }
+.brand-mark {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: linear-gradient(145deg, var(--gold), #9a6f1f);
+  color: #1a1205; font-weight: 700; display: grid; place-items: center;
+  letter-spacing: .04em;
+}
+.brand strong { display: block; font-size: 14px; }
+.brand span { color: var(--muted); font-size: 11px; }
+.op-sentence {
+  margin: 0; text-align: center; color: var(--gold2);
+  font-size: 12.5px; font-weight: 500; letter-spacing: .01em;
+}
+.top-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.btn {
+  border: 1px solid var(--border); background: var(--panel);
+  border-radius: 8px; padding: 7px 12px; color: var(--text);
+}
+.btn:hover { border-color: #3d5378; background: var(--panel2); }
+.btn-primary {
+  background: linear-gradient(180deg, var(--gold2), var(--gold));
+  color: #1a1205; border-color: transparent; font-weight: 600;
+}
+.btn-primary:hover { filter: brightness(1.05); }
+.btn-ghost { background: transparent; }
+.btn-danger { color: var(--red); border-color: #5a2a2a; }
+.nav {
+  display: flex; gap: 4px; padding: 8px 14px;
+  border-bottom: 1px solid var(--border); background: var(--bg2);
+  overflow-x: auto;
+}
+.nav-item {
+  border: 0; background: transparent; color: var(--muted);
+  padding: 8px 12px; border-radius: 8px; white-space: nowrap; font-weight: 500;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-item.active { color: #1a1205; background: var(--gold); }
+.main { padding: 18px; max-width: 1400px; width: 100%; margin: 0 auto; flex: 1; }
+.view-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 14px; }
+.view-head h1 { margin: 0; font-size: 22px; font-weight: 650; }
+.view-head p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.grid { display: grid; gap: 12px; }
+.grid-2 { grid-template-columns: 1.1fr .9fr; }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 1100px) {
+  .topbar { grid-template-columns: 1fr; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .op-sentence { text-align: left; }
+}
+.card {
+  background: linear-gradient(180deg, var(--panel), var(--panel2));
+  border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 14px;
+}
+.card h3 { margin: 0 0 8px; font-size: 14px; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); font-size: 12px; }
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+  border: 1px solid var(--border); background: rgba(0,0,0,.2);
+}
+.tag.red { color: #ffb4b4; border-color: #6b3030; background: rgba(232,93,93,.12); }
+.tag.gold { color: var(--gold2); border-color: #6b5420; background: rgba(212,168,75,.12); }
+.tag.green { color: #b6f0d2; border-color: #2a6b4c; background: rgba(62,207,142,.12); }
+.tag.blue { color: #b9d0ff; border-color: #2f4d80; background: rgba(91,141,239,.12); }
+.list { display: flex; flex-direction: column; gap: 8px; }
+.row {
+  display: flex; gap: 12px; align-items: flex-start; justify-content: space-between;
+  padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: rgba(0,0,0,.18);
+}
+.row:hover { border-color: #3d5378; }
+.row.clickable { cursor: pointer; }
+.row-main { min-width: 0; flex: 1; }
+.row-main strong { display: block; margin-bottom: 2px; }
+.kpi {
+  padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,.2);
+}
+.kpi .n { font-size: 24px; font-weight: 700; color: var(--gold2); }
+.kpi .l { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.bar {
+  height: 8px; background: #0a101c; border-radius: 99px; overflow: hidden; border: 1px solid var(--border);
+}
+.bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2)); }
+.ladder {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px;
+}
+.rung {
+  font-size: 10px; padding: 3px 6px; border-radius: 4px;
+  border: 1px solid var(--border); color: var(--muted);
+}
+.rung.on { color: #1a1205; background: var(--gold); border-color: transparent; font-weight: 600; }
+.rung.done { color: var(--green); border-color: #2a6b4c; }
+.form-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.form-row label { font-size: 12px; color: var(--muted); font-weight: 500; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+input, select, textarea {
+  width: 100%; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--border); background: #0c1422;
+}
+input:focus, select:focus, textarea:focus { outline: 1px solid var(--gold); border-color: var(--gold); }
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(3,8,18,.72);
+  display: grid; place-items: center; z-index: 50; padding: 16px;
+}
+.modal-backdrop.hidden { display: none; }
+.modal {
+  width: min(560px, 100%); background: var(--panel); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: var(--shadow); max-height: 90vh; overflow: auto;
+}
+.modal-h { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.modal-h h2 { margin: 0; font-size: 16px; }
+.modal-b { padding: 16px; }
+.modal-f { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+.icon-btn { border: 0; background: transparent; color: var(--muted); font-size: 20px; line-height: 1; }
+.split { display: grid; grid-template-columns: 320px 1fr; gap: 12px; }
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+.shop-item {
+  padding: 10px 12px; border-radius: 8px; border: 1px solid transparent; cursor: pointer;
+}
+.shop-item:hover, .shop-item.active { background: rgba(212,168,75,.08); border-color: #5a4a22; }
+.check { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; }
+.check input { width: auto; margin-top: 3px; }
+.table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.table th, .table td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+.table th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+.empty { padding: 28px; text-align: center; color: var(--muted); border: 1px dashed var(--border); border-radius: 8px; }
+.req { color: var(--red); }
+.pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">GVC</div>
+      <div><strong>TPO Command Center</strong><span>Internal broker OS · 11 approved shops</span></div>
+    </div>
+    <p class="op-sentence">Know the shop. Find the producer. Earn the scenario. Win the first file. Ask for the second.</p>
+    <div class="top-actions">
+      <button class="btn btn-ghost" id="btnExport">Export</button>
+      <button class="btn btn-ghost" id="btnImport">Import</button>
+      <button class="btn btn-ghost btn-danger" id="btnReset">Reset</button>
+      <button class="btn btn-primary" id="btnLog">Log conversation</button>
+    </div>
+  </header>
+  <nav class="nav" id="nav"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<div class="modal-backdrop hidden" id="modalLog">
+  <div class="modal">
+    <div class="modal-h"><h2>Log conversation</h2><button class="icon-btn" id="closeLog" aria-label="Close">&times;</button></div>
+    <form class="modal-b" id="formLog">
+      <div class="form-row"><label>Shop <span class="req">*</span></label><select id="logShop" required></select></div>
+      <div class="form-row"><label>Rung change (optional)</label><select id="logRung"><option value="">— no change —</option></select></div>
+      <div class="form-row"><label>Outcome type <span class="req">*</span></label>
+        <select id="logOutcome" required>
+          <option value="loan_moved">Loan opportunity moved closer to GVC</option>
+          <option value="feedback">Broker feedback improves product/process</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Notes / intelligence</label><textarea id="logNotes" rows="3" placeholder="What did we learn?"></textarea></div>
+      <div class="form-row"><label>Next step — What <span class="req">*</span></label><input id="logNext" required placeholder="What happens next?" /></div>
+      <div class="form-grid">
+        <div class="form-row"><label>Who owns it <span class="req">*</span></label><input id="logOwner" required /></div>
+        <div class="form-row"><label>By date <span class="req">*</span></label><input id="logDate" type="date" required /></div>
+      </div>
+      <div class="modal-f" style="padding:0;border:0;margin-top:8px">
+        <button type="button" class="btn btn-ghost" id="cancelLog">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+<input type="file" id="importFile" accept="application/json" hidden />
+
+<script>
+const STORAGE_KEY = "gvc-tpo-command-center-v1";
+const VIEWS = [
+  ["today","Today"],["shops","Shops"],["fastlane","Fast Lane"],["rooms","Rooms"],
+  ["rhythm","Rhythm"],["campaigns","Campaigns"],["feedback","Feedback"],["scoreboard","Scoreboard"]
+];
+const RUNGS = [
+  "Responded","Discovery conversation","Producer introduction","Scenario identified",
+  "GVC comparison completed","First-file commitment","Submitted","Funded","Second loan identified"
+];
+const CAMPAIGN_TYPES = [
+  "First File Challenge","Meet the Producers","Difficult Loan Week","Lost Loan Debrief",
+  "Processor Partnership","Second Loan Sprint","Dormant Shop Reset"
+];
+const OWNER_OPENER = "Who on your team is most likely to have the kind of loan where GVC could prove itself? Would you mind making a quick introduction?";
+const FASTLANE_INVITE = "Let's identify one file where GVC has a legitimate chance to prove itself. I'll help map the product, documentation, pricing, contacts, and next step so your first submission doesn't feel like an experiment.";
+const FASTLANE_CHECKS = [
+  ["scenarioReview","10-min scenario review"],
+  ["comparison","Side-by-side execution comparison"],
+  ["portalHelp","Portal assistance"],
+  ["opsContact","Named ops contact"],
+  ["milestones","Proactive milestone communication"],
+  ["debrief","Post-close debrief"],
+  ["secondAsk","Immediate request for second opportunity"]
+];
+
+const state = { view: "today", selectedShopId: null, data: null };
+
+function isoDate(d=new Date()){ return d.toISOString().slice(0,10); }
+function addDays(n){ const d=new Date(); d.setDate(d.getDate()+n); return isoDate(d); }
+function uid(){ return Math.random().toString(36).slice(2,10); }
+function esc(s){ return String(s??"").replace(/[&<>"']/g,c=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c])); }
+function parseDate(s){ return s ? new Date(s+"T12:00:00") : null; }
+function isPast(s){ const d=parseDate(s); return d && d < new Date(new Date().toDateString()); }
+function weekday(){ return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()]; }
+
+function seedShops(){
+  const base = [
+    ["Horizon Home Lending","Carmel, IN",2],
+    ["Keystone Mortgage Group","Indianapolis, IN",4],
+    ["Northbridge Brokers","Fort Wayne, IN",6],
+    ["Summit Street Lending","Fishers, IN",3],
+    ["Prairie State Mortgage","Bloomington, IN",1],
+    ["Lakeside Loan Partners","South Bend, IN",5],
+    ["Capitol Avenue Home Loans","Anderson, IN",7],
+    ["Maple & Main Mortgage","Muncie, IN",2],
+    ["River Bend Funding","Evansville, IN",8],
+    ["Crossroads Brokerage","Lafayette, IN",3],
+    ["Pendleton Peak Lending","Pendleton, IN",9]
+  ];
+  const people = [
+    [["Dana Whitfield","Owner"],["Marcus Lee","LO"],["Priya Shah","LO"],["Elena Ruiz","Processor"]],
+    [["Tom Harlan","Owner"],["Jamie Cole","LO"],["Noah Price","LO"],["Kim Orth","LOA"]],
+    [["Sara Nguyen","Owner"],["Chris Bell","LO"],["Ava Monroe","LO"],["Rick Hale","Ops"]],
+    [["Brett Owens","Owner"],["Lila Grant","LO"],["Omar Diaz","LO"],["Nancy Pike","Processor"]],
+    [["Helen Cho","Owner"],["Drew Samuels","LO"],["Maya Trent","LO"],["Gus Klein","LOA"]],
+    [["Ian Brooks","Owner"],["Tara Quinn","LO"],["Ben Asher","LO"],["Jill Mooney","Ops"]],
+    [["Carol Vance","Owner"],["Pete Romano","LO"],["Zoe Hart","LO"],["Ann Keller","Processor"]],
+    [["Greg Mills","Owner"],["Sasha Ford","LO"],["Evan Moss","LO"],["Dee Patel","LOA"]],
+    [["Nina Ortega","Owner"],["Kyle Reed","LO"],["Hannah Wu","LO"],["Paul Greer","Ops"]],
+    [["Ray Simmons","Owner"],["Ivy Chen","LO"],["Jordan Blake","LO"],["Meg Stanton","Processor"]],
+    [["Alex Voyles","Owner"],["Casey Dunn","LO"],["Riley Parks","LO"],["Pat Gomez","LOA"]]
+  ];
+  const lenders = ["Rocket/UWM mix","Local CU + UWM","PennyMac heavy","UWM exclusive habit","Mixed retail/broker","Freedom + UWM","Local bank loyalty","Newrez primary","Self-serve portals","Wholesale patchwork","GVC + backup"];
+  const opps = ["Self-employed DSCR gaps","Investor cash-out","Thin-file FTHB","Rural USDA overlays","Credit-event purchase","Non-QM bridge","Condo warrantability","Bank statement loans","VA IRRRL + purchase","Jumbo near limits","Second home quirks"];
+
+  return base.map((b,i)=>{
+    const p = people[i];
+    const rung = b[2];
+    const funded = rung >= 8;
+    const hasNext = i !== 4 && i !== 7; // two red shops missing dated next step
+    return {
+      id: "shop-"+ (i+1),
+      name: b[0], city: b[1], rung,
+      relationships: {
+        owner: { name: p[0][0], role: p[0][1] },
+        lo1: { name: p[1][0], role: p[1][1] },
+        lo2: { name: p[2][0], role: p[2][1] },
+        ops: { name: p[3][0], role: p[3][1] }
+      },
+      opportunity: opps[i],
+      lenderLoyalty: lenders[i],
+      nextStep: hasNext ? {
+        what: rung < 4 ? "Book discovery / producer intro" : rung < 6 ? "Run GVC comparison on live file" : rung < 8 ? "Push submission / clear conditions" : "Ask for second loan",
+        who: i % 2 ? "Brock" : p[0][0],
+        date: addDays((i % 5) - 1)
+      } : { what: "", who: "", date: "" },
+      fastLane: {
+        scenarioReview: rung >= 4,
+        comparison: rung >= 5,
+        portalHelp: rung >= 6,
+        opsContact: rung >= 6,
+        milestones: rung >= 7,
+        debrief: funded,
+        secondAsk: rung >= 9
+      },
+      campaignProgress: i % 3,
+      conversations: [],
+      losses: rung === 3 ? [{ reason: "Pricing lost to UWM special", date: addDays(-12) }] : [],
+      fundings: funded ? [{ date: addDays(-20), secondAsk: rung >= 9 }] : []
+    };
+  });
+}
+
+function seedData(){
+  const shops = seedShops();
+  const start = addDays(-3);
+  const end = addDays(11);
+  return {
+    version: 1,
+    shops,
+    conversations: [
+      { id: uid(), shopId: shops[1].id, at: addDays(-1), outcome: "loan_moved", notes: "Scenario on self-employed borrower; docs list agreed.", rungAfter: 4, next: shops[1].nextStep, meaningful: true },
+      { id: uid(), shopId: shops[2].id, at: addDays(-2), outcome: "loan_moved", notes: "Portal walkthrough with ops.", rungAfter: 6, next: shops[2].nextStep, meaningful: true }
+    ],
+    rooms: [
+      { id: "room-tue", label: "Tue 11:00–11:30", day: "Tue", invites: [
+        { shopId: shops[1].id, person: "Jamie Cole" },
+        { shopId: shops[3].id, person: "Lila Grant" },
+        { shopId: shops[5].id, person: "Tara Quinn" }
+      ], known: "Two purchase files with income complexity", needsConfirm: "Property type / condo questionnaire", gvcPath: "Likely on bank-statement option", owner: "Brock", hearBack: addDays(2) },
+      { id: "room-thu", label: "Thu 11:00–11:30", day: "Thu", invites: [
+        { shopId: shops[0].id, person: "Marcus Lee" },
+        { shopId: shops[9].id, person: "Ivy Chen" }
+      ], known: "", needsConfirm: "", gvcPath: "", owner: "", hearBack: "" }
+    ],
+    rhythm: {
+      weekOf: isoDate(),
+      mon: { done: false, uncertainty: "", shopId: "", notes: "" },
+      tue: { done: false, notes: "" },
+      wed: { done: false, notes: "" },
+      thu: { done: false, insight: "" },
+      fri: { done: false, notes: "" }
+    },
+    campaign: {
+      type: "First File Challenge",
+      start, end,
+      objective: "One submission commitment from each shop not yet funded",
+      notes: "Use Fast Lane invite verbatim."
+    },
+    feedback: [
+      { id: uid(), shopId: shops[4].id, category: "documentation friction", detail: "Bank-statement worksheet too heavy for LOAs", status: "open", response: "", created: addDays(-6) },
+      { id: uid(), shopId: shops[6].id, category: "pricing objections", detail: "Lost a VA purchase on rate", status: "brought", response: "", created: addDays(-4) },
+      { id: uid(), shopId: shops[2].id, category: "portal/submission friction", detail: "Condition uploads timing out", status: "closed", response: "IT patched upload timeout; retry with chrome.", created: addDays(-10) }
+    ]
+  };
+}
+
+function load(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return seedData();
+    const d = JSON.parse(raw);
+    if (!d.shops || d.shops.length !== 11) return seedData();
+    return d;
+  } catch { return seedData(); }
+}
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }
+
+function mappedCount(shop){
+  const r = shop.relationships || {};
+  return [r.owner,r.lo1,r.lo2,r.ops].filter(p => p && p.name && p.name.trim()).length;
+}
+function hasDatedNext(shop){ return !!(shop.nextStep && shop.nextStep.date && shop.nextStep.what); }
+function rungName(n){ return RUNGS[(n||1)-1] || "—"; }
+
+function fastLaneBucket(shop){
+  if (shop.rung >= 8) return null;
+  if (!shop.fastLane.scenarioReview && shop.rung < 4) return 0;
+  if (!shop.fastLane.comparison && shop.rung < 5) return 1;
+  if (shop.rung < 6) return 2;
+  if (shop.rung === 6) return 3;
+  if (shop.rung === 7) return 4;
+  return 2;
+}
+const BUCKET_LABELS = ["No scenario","No comparison","No commitment","Committed not submitted","Submitted not funded"];
+
+function buildTodayTasks(){
+  const tasks = [];
+  const d = state.data;
+  d.shops.forEach(s => {
+    if (!hasDatedNext(s)) tasks.push({ severity:"red", title: s.name + " — no dated next step", detail: "Every shop needs What / Who / By when.", view:"shops", shopId:s.id });
+    else if (isPast(s.nextStep.date)) tasks.push({ severity:"red", title: s.name + " — next step overdue", detail: s.nextStep.what + " · " + s.nextStep.who, view:"shops", shopId:s.id });
+  });
+  d.shops.filter(s => s.rung < 8).forEach(s => {
+    const b = fastLaneBucket(s);
+    if (b !== null && b <= 2) tasks.push({ severity:"gold", title: "Fast Lane: " + s.name, detail: BUCKET_LABELS[b], view:"fastlane", shopId:s.id });
+  });
+  const wd = weekday();
+  const rhythmMap = { Mon:"mon", Tue:"tue", Wed:"wed", Thu:"thu", Fri:"fri" };
+  if (rhythmMap[wd] && !d.rhythm[rhythmMap[wd]].done) {
+    const titles = { Mon:"Rhythm — What's on your desk?", Tue:"Rhythm — Scenario / comparison talks", Wed:"Rhythm — Scenario / comparison talks", Thu:"Rhythm — One Useful Thing", Fri:"Rhythm — Close loops" };
+    tasks.push({ severity:"blue", title: titles[wd], detail: "Complete today's broker rhythm card.", view:"rhythm" });
+  }
+  d.rooms.forEach(r => {
+    if (r.day === wd || (!r.invites.length)) {
+      tasks.push({ severity:"blue", title: "Scenario Room — " + r.label, detail: (r.invites.length? r.invites.length+" invites":"Invite 2–3 producers") , view:"rooms" });
+    }
+  });
+  tasks.push({ severity:"gold", title: "Campaign: " + d.campaign.type, detail: d.campaign.objective, view:"campaigns" });
+  d.feedback.filter(f => f.status !== "closed").forEach(f => {
+    const shop = d.shops.find(s => s.id === f.shopId);
+    tasks.push({ severity:"blue", title: "Open feedback — " + (shop?shop.name:"Shop"), detail: f.detail, view:"feedback" });
+  });
+  return tasks;
+}
+
+function renderNav(){
+  document.getElementById("nav").innerHTML = VIEWS.map(([id,label]) =>
+    `<button class="nav-item ${state.view===id?"active":""}" data-view="${id}">${label}</button>`
+  ).join("");
+}
+
+function render(){
+  renderNav();
+  const main = document.getElementById("main");
+  const map = { today: renderToday, shops: renderShops, fastlane: renderFastLane, rooms: renderRooms, rhythm: renderRhythm, campaigns: renderCampaigns, feedback: renderFeedback, scoreboard: renderScoreboard };
+  main.innerHTML = (map[state.view] || renderToday)();
+  bindView();
+}
+
+function renderToday(){
+  const tasks = buildTodayTasks();
+  const red = tasks.filter(t => t.severity==="red").length;
+  return `<div class="view-head"><div><h1>Today</h1><p>Work queue only — built from missing next steps, Fast Lane blockers, rhythm, rooms, campaign, and feedback loops.</p></div>
+    <div class="pill-row"><span class="tag red">${red} red</span><span class="tag">${tasks.length} total</span></div></div>
+    <div class="list">${tasks.length? tasks.map(t => `
+      <div class="row clickable" data-goto="${t.view}" data-shop="${t.shopId||""}">
+        <div class="row-main"><strong>${esc(t.title)}</strong><div class="muted">${esc(t.detail)}</div></div>
+        <span class="tag ${t.severity}">${t.severity==="red"?"RED":t.view}</span>
+      </div>`).join("") : `<div class="empty">Queue clear. Log a conversation or advance a shop.</div>`}</div>`;
+}
+
+function renderShops(){
+  const shops = state.data.shops;
+  if (!state.selectedShopId) state.selectedShopId = shops[0].id;
+  const s = shops.find(x => x.id === state.selectedShopId) || shops[0];
+  const list = shops.map(sh => {
+    const red = !hasDatedNext(sh);
+    return `<div class="shop-item ${sh.id===s.id?"active":""}" data-select-shop="${sh.id}">
+      <strong>${esc(sh.name)}</strong>
+      <div class="muted">${esc(sh.city)} · R${sh.rung} ${esc(rungName(sh.rung))}</div>
+      ${red?`<span class="tag red">No next step</span>`:`<span class="tag">${esc(sh.nextStep.date)}</span>`}
+    </div>`;
+  }).join("");
+  const r = s.relationships;
+  return `<div class="view-head"><div><h1>Shops</h1><p>Commitment ladder + relationship map. Target 3+ people per shop.</p></div></div>
+  <div class="split">
+    <div class="card" style="padding:8px;max-height:70vh;overflow:auto">${list}</div>
+    <div class="card" id="shopDetail">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
+        <div><h3 style="font-size:18px;margin:0">${esc(s.name)}</h3><div class="muted">${esc(s.city)}</div></div>
+        <span class="tag gold">Rung ${s.rung}: ${esc(rungName(s.rung))}</span>
+      </div>
+      <div class="ladder">${RUNGS.map((name,i)=>`<span class="rung ${i+1===s.rung?"on":(i+1<s.rung?"done":"")}">${i+1}. ${esc(name)}</span>`).join("")}</div>
+      <div class="form-row" style="margin-top:12px"><label>Ladder rung</label>
+        <select id="shopRung">${RUNGS.map((n,i)=>`<option value="${i+1}" ${s.rung===i+1?"selected":""}>${i+1}. ${esc(n)}</option>`).join("")}</select>
+      </div>
+      <h3 style="margin-top:16px">Relationship map</h3>
+      <p class="muted" style="margin-top:0">Owner opener: “${esc(OWNER_OPENER)}”</p>
+      <div class="form-grid">
+        <div class="form-row"><label>Owner / decision-maker</label><input id="relOwner" value="${esc(r.owner.name)}" /></div>
+        <div class="form-row"><label>Producing LO 1</label><input id="relLo1" value="${esc(r.lo1.name)}" /></div>
+        <div class="form-row"><label>Producing LO 2</label><input id="relLo2" value="${esc(r.lo2.name)}" /></div>
+        <div class="form-row"><label>Processor / LOA / ops</label><input id="relOps" value="${esc(r.ops.name)}" /></div>
+        <div class="form-row"><label>Primary GVC opportunity</label><input id="relOpp" value="${esc(s.opportunity)}" /></div>
+        <div class="form-row"><label>Current lender loyalty</label><input id="relLender" value="${esc(s.lenderLoyalty)}" /></div>
+      </div>
+      <h3>Dated next step</h3>
+      <div class="form-row"><label>What happens next?</label><input id="nsWhat" value="${esc(s.nextStep.what)}" /></div>
+      <div class="form-grid">
+        <div class="form-row"><label>Who owns it?</label><input id="nsWho" value="${esc(s.nextStep.who)}" /></div>
+        <div class="form-row"><label>By what date?</label><input id="nsDate" type="date" value="${esc(s.nextStep.date)}" /></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-primary" id="saveShop">Save shop</button></div>
+    </div>
+  </div>`;
+}
+
+function renderFastLane(){
+  const unfunded = state.data.shops.filter(s => s.rung < 8).map(s => ({s, b: fastLaneBucket(s)})).sort((a,b)=>a.b-b.b);
+  return `<div class="view-head"><div><h1>Fast Lane</h1><p>First-file experience — remove the “experiment” feeling.</p></div></div>
+  <div class="card" style="margin-bottom:12px"><h3>Invitation</h3><p style="margin:0;color:var(--gold2)">${esc(FASTLANE_INVITE)}</p></div>
+  <div class="list">${unfunded.map(({s,b}) => `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <div><strong>${esc(s.name)}</strong><div class="muted">R${s.rung} · ${esc(rungName(s.rung))}</div></div>
+        <span class="tag gold">${esc(BUCKET_LABELS[b])}</span>
+      </div>
+      <div class="grid" style="margin-top:8px">${FASTLANE_CHECKS.map(([k,label]) => `
+        <label class="check"><input type="checkbox" data-fl-shop="${s.id}" data-fl-key="${k}" ${s.fastLane[k]?"checked":""}/> <span>${esc(label)}</span></label>`).join("")}</div>
+    </div>`).join("")}</div>`;
+}
+
+function renderRooms(){
+  return `<div class="view-head"><div><h1>Rooms</h1><p>Tue & Thu 11:00–11:30 — brokers bring real files. Invite 2–3 targeted producers even if empty.</p></div></div>
+  <div class="grid grid-2">${state.data.rooms.map(r => `
+    <div class="card" data-room="${r.id}">
+      <h3>${esc(r.label)}</h3>
+      <div class="form-row"><label>Invites (shop · person)</label>
+        <textarea data-room-field="invitesText" rows="3">${esc(r.invites.map(i=>{const sh=state.data.shops.find(s=>s.id===i.shopId); return (sh?sh.name:i.shopId)+" · "+i.person;}).join("\n"))}</textarea>
+        <div class="muted">One per line: Shop name · Person</div>
+      </div>
+      <div class="form-row"><label>What is known</label><textarea data-room-field="known" rows="2">${esc(r.known)}</textarea></div>
+      <div class="form-row"><label>What needs confirmation</label><textarea data-room-field="needsConfirm" rows="2">${esc(r.needsConfirm)}</textarea></div>
+      <div class="form-row"><label>GVC likely path?</label><input data-room-field="gvcPath" value="${esc(r.gvcPath)}" /></div>
+      <div class="form-grid">
+        <div class="form-row"><label>Who owns the answer</label><input data-room-field="owner" value="${esc(r.owner)}" /></div>
+        <div class="form-row"><label>Hear back by</label><input type="date" data-room-field="hearBack" value="${esc(r.hearBack)}" /></div>
+      </div>
+      <button class="btn btn-primary" data-save-room="${r.id}">Save room</button>
+    </div>`).join("")}</div>`;
+}
+
+function renderRhythm(){
+  const r = state.data.rhythm;
+  const cards = [
+    ["mon","Mon","What's on your desk?","Which borrower is creating the most uncertainty: self-employed, investor, credit, property, or documentation?"],
+    ["tue","Tue","Scenario or comparison","Run scenario or comparison conversations."],
+    ["wed","Wed","Scenario or comparison","Continue scenario or comparison conversations."],
+    ["thu","Thu","One Useful Thing","One short insight from this week's real talks."],
+    ["fri","Fri","Close loops","Promised answers, next-week appts, update cockpit, send product-dev feedback internally."]
+  ];
+  return `<div class="view-head"><div><h1>Rhythm</h1><p>Interactive broker week · week of ${esc(r.weekOf)}</p></div></div>
+  <div class="grid grid-2">${cards.map(([key,day,title,help]) => {
+    const c = r[key];
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between"><h3>${day} — ${title}</h3>
+        <label class="check" style="padding:0"><input type="checkbox" data-rhythm-done="${key}" ${c.done?"checked":""}/> Done</label></div>
+      <p class="muted">${esc(help)}</p>
+      ${key==="mon"?`<div class="form-row"><label>Uncertainty type</label>
+        <select data-rhythm-field="${key}.uncertainty">
+          <option value="">—</option>
+          ${["self-employed","investor","credit","property","documentation"].map(o=>`<option ${c.uncertainty===o?"selected":""}>${o}</option>`).join("")}
+        </select></div>
+        <div class="form-row"><label>Shop</label>
+          <select data-rhythm-field="${key}.shopId"><option value="">—</option>${state.data.shops.map(s=>`<option value="${s.id}" ${c.shopId===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select>
+        </div>`:""}
+      ${key==="thu"?`<div class="form-row"><label>Insight</label><textarea data-rhythm-field="${key}.insight" rows="3">${esc(c.insight||"")}</textarea></div>`
+        :`<div class="form-row"><label>Notes</label><textarea data-rhythm-field="${key}.notes" rows="3">${esc(c.notes||"")}</textarea></div>`}
+    </div>`;
+  }).join("")}</div>
+  <div style="margin-top:12px;text-align:right"><button class="btn btn-primary" id="saveRhythm">Save rhythm</button></div>`;
+}
+
+function renderCampaigns(){
+  const c = state.data.campaign;
+  return `<div class="view-head"><div><h1>Campaigns</h1><p>One active 2-week campaign. Movement over airtime.</p></div></div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="form-grid">
+      <div class="form-row"><label>Active campaign</label>
+        <select id="campType">${CAMPAIGN_TYPES.map(t=>`<option ${c.type===t?"selected":""}>${esc(t)}</option>`).join("")}</select>
+      </div>
+      <div class="form-row"><label>Objective</label><input id="campObj" value="${esc(c.objective)}" /></div>
+      <div class="form-row"><label>Start</label><input type="date" id="campStart" value="${esc(c.start)}" /></div>
+      <div class="form-row"><label>End</label><input type="date" id="campEnd" value="${esc(c.end)}" /></div>
+    </div>
+    <div class="form-row"><label>Notes</label><textarea id="campNotes" rows="2">${esc(c.notes)}</textarea></div>
+    <div style="text-align:right"><button class="btn btn-primary" id="saveCamp">Save campaign</button></div>
+  </div>
+  <div class="card"><h3>Per-shop progress (0–3)</h3>
+    <table class="table"><thead><tr><th>Shop</th><th>Rung</th><th>Progress</th></tr></thead>
+    <tbody>${state.data.shops.map(s=>`<tr>
+      <td>${esc(s.name)}</td><td>R${s.rung}</td>
+      <td><input type="range" min="0" max="3" value="${s.campaignProgress||0}" data-camp-prog="${s.id}" /> <span class="mono">${s.campaignProgress||0}/3</span></td>
+    </tr>`).join("")}</tbody></table>
+  </div>`;
+}
+
+function renderFeedback(){
+  const cats = ["products they cannot place","documentation friction","pricing objections","portal/submission friction","competitors winning","reasons GVC loses","repeated requests"];
+  return `<div class="view-head"><div><h1>Feedback</h1><p>Capture friction. Close the loop: “You raised this issue last week. I brought it into our product conversation, and here is what I learned.”</p></div>
+    <button class="btn btn-primary" id="addFeedback">Add feedback</button></div>
+  <div class="list">${state.data.feedback.map(f => {
+    const shop = state.data.shops.find(s=>s.id===f.shopId);
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <div><strong>${esc(shop?shop.name:"?")}</strong> · <span class="muted">${esc(f.category)}</span>
+          <div style="margin-top:6px">${esc(f.detail)}</div>
+          ${f.response?`<div class="muted" style="margin-top:6px">Loop: ${esc(f.response)}</div>`:""}
+        </div>
+        <select data-fb-status="${f.id}">
+          <option value="open" ${f.status==="open"?"selected":""}>open</option>
+          <option value="brought" ${f.status==="brought"?"selected":""}>brought internally</option>
+          <option value="closed" ${f.status==="closed"?"selected":""}>closed with response</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-top:8px"><label>Close-the-loop response</label>
+        <textarea data-fb-resp="${f.id}" rows="2" placeholder="You raised this issue last week...">${esc(f.response||"")}</textarea></div>
+      <button class="btn" data-fb-save="${f.id}">Save</button>
+    </div>`;
+  }).join("") || `<div class="empty">No feedback yet.</div>`}</div>
+  <div class="card" style="margin-top:12px" id="fbNew" hidden>
+    <h3>New feedback</h3>
+    <div class="form-grid">
+      <div class="form-row"><label>Shop</label><select id="fbShop">${state.data.shops.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select></div>
+      <div class="form-row"><label>Category</label><select id="fbCat">${cats.map(c=>`<option>${esc(c)}</option>`).join("")}</select></div>
+    </div>
+    <div class="form-row"><label>Detail</label><textarea id="fbDetail" rows="3"></textarea></div>
+    <button class="btn btn-primary" id="saveNewFb">Save feedback</button>
+  </div>`;
+}
+
+function renderScoreboard(){
+  const shops = state.data.shops;
+  const withNext = shops.filter(hasDatedNext).length;
+  const relOk = shops.filter(s => mappedCount(s) >= 3).length;
+  const weekAgo = addDays(-7);
+  const convos = state.data.conversations.filter(c => c.at >= weekAgo && c.meaningful);
+  const scenarios = shops.filter(s => s.rung >= 4).length; // proxy + recent
+  const comparisons = shops.filter(s => s.fastLane.comparison || s.rung >= 5).length;
+  const commitments = shops.filter(s => s.rung >= 6).length;
+  const submissions = shops.filter(s => s.rung >= 7).length;
+  const fundings = shops.filter(s => s.rung >= 8).length;
+  const lossesWithReason = state.data.feedback.filter(f => f.category === "reasons GVC loses").length + shops.reduce((n,s)=>n+(s.losses||[]).length,0);
+  const secondAsks = shops.filter(s => s.fastLane.secondAsk || s.rung >= 9).length;
+  const meter = (label, val, goal) => {
+    const pct = Math.min(100, Math.round((val/goal)*100));
+    return `<div class="kpi"><div class="n">${val}<span class="muted" style="font-size:14px"> / ${goal}</span></div><div class="l">${esc(label)}</div><div class="bar" style="margin-top:8px"><span style="width:${pct}%"></span></div></div>`;
+  };
+  return `<div class="view-head"><div><h1>Scoreboard</h1><p>30-day movement — not airtime.</p></div></div>
+  <div class="grid grid-3" style="margin-bottom:12px">
+    ${meter("Shops with dated next step", withNext, 11)}
+    ${meter("Shops with 3+ relationships", relOk, 11)}
+    ${meter("Meaningful convos / week", convos.length, 15)}
+    ${meter("Scenarios in motion (rung≥4)", scenarios, 8)}
+    ${meter("Comparisons done", comparisons, 4)}
+    ${meter("First-file commitments (rung≥6)", commitments, 2)}
+  </div>
+  <div class="grid grid-2">
+    <div class="card"><h3>Submissions & fundings by shop</h3>
+      <table class="table"><thead><tr><th>Shop</th><th>Rung</th><th>Submitted</th><th>Funded</th><th>2nd ask</th></tr></thead>
+      <tbody>${shops.map(s=>`<tr>
+        <td>${esc(s.name)}</td><td>R${s.rung}</td>
+        <td>${s.rung>=7?"✓":"—"}</td><td>${s.rung>=8?"✓":"—"}</td><td>${s.rung>=9||s.fastLane.secondAsk?"✓":"—"}</td>
+      </tr>`).join("")}</tbody></table>
+    </div>
+    <div class="card"><h3>Loss & second-loan hygiene</h3>
+      <div class="list">
+        <div class="row"><div class="row-main"><strong>Losses with reason logged</strong><div class="muted">Feedback + shop loss records</div></div><span class="tag">${lossesWithReason}</span></div>
+        <div class="row"><div class="row-main"><strong>Fundings with second-loan ask</strong></div><span class="tag ${secondAsks? "green":""}">${secondAsks} / ${fundings||0}</span></div>
+        <div class="row"><div class="row-main"><strong>Active campaign</strong><div class="muted">${esc(state.data.campaign.type)}</div></div><span class="tag gold">live</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindView(){
+  document.querySelectorAll("[data-goto]").forEach(el => el.addEventListener("click", () => {
+    state.view = el.getAttribute("data-goto");
+    const sid = el.getAttribute("data-shop");
+    if (sid) state.selectedShopId = sid;
+    render();
+  }));
+  document.querySelectorAll("[data-select-shop]").forEach(el => el.addEventListener("click", () => {
+    state.selectedShopId = el.getAttribute("data-select-shop"); render();
+  }));
+  const saveShop = document.getElementById("saveShop");
+  if (saveShop) saveShop.addEventListener("click", () => {
+    const s = state.data.shops.find(x => x.id === state.selectedShopId);
+    if (!s) return;
+    s.rung = +document.getElementById("shopRung").value;
+    s.relationships.owner.name = document.getElementById("relOwner").value.trim();
+    s.relationships.lo1.name = document.getElementById("relLo1").value.trim();
+    s.relationships.lo2.name = document.getElementById("relLo2").value.trim();
+    s.relationships.ops.name = document.getElementById("relOps").value.trim();
+    s.opportunity = document.getElementById("relOpp").value.trim();
+    s.lenderLoyalty = document.getElementById("relLender").value.trim();
+    s.nextStep = { what: document.getElementById("nsWhat").value.trim(), who: document.getElementById("nsWho").value.trim(), date: document.getElementById("nsDate").value };
+    save(); render();
+  });
+  document.querySelectorAll("[data-fl-shop]").forEach(el => el.addEventListener("change", () => {
+    const s = state.data.shops.find(x => x.id === el.getAttribute("data-fl-shop"));
+    if (!s) return;
+    s.fastLane[el.getAttribute("data-fl-key")] = el.checked;
+    save();
+  }));
+  document.querySelectorAll("[data-save-room]").forEach(btn => btn.addEventListener("click", () => {
+    const id = btn.getAttribute("data-save-room");
+    const card = btn.closest(".card");
+    const room = state.data.rooms.find(r => r.id === id);
+    const invitesText = card.querySelector('[data-room-field="invitesText"]').value;
+    room.invites = invitesText.split("\n").map(l => l.trim()).filter(Boolean).map(line => {
+      const [shopName, person] = line.split("·").map(x => x.trim());
+      const sh = state.data.shops.find(s => s.name.toLowerCase() === (shopName||"").toLowerCase());
+      return { shopId: sh ? sh.id : "", person: person || shopName || "" };
+    });
+    ["known","needsConfirm","gvcPath","owner","hearBack"].forEach(f => {
+      const el = card.querySelector(`[data-room-field="${f}"]`);
+      if (el) room[f] = el.value;
+    });
+    save(); render();
+  }));
+  const saveRhythm = document.getElementById("saveRhythm");
+  if (saveRhythm) saveRhythm.addEventListener("click", () => {
+    document.querySelectorAll("[data-rhythm-done]").forEach(el => {
+      state.data.rhythm[el.getAttribute("data-rhythm-done")].done = el.checked;
+    });
+    document.querySelectorAll("[data-rhythm-field]").forEach(el => {
+      const [day, field] = el.getAttribute("data-rhythm-field").split(".");
+      state.data.rhythm[day][field] = el.value;
+    });
+    save(); render();
+  });
+  const saveCamp = document.getElementById("saveCamp");
+  if (saveCamp) saveCamp.addEventListener("click", () => {
+    state.data.campaign.type = document.getElementById("campType").value;
+    state.data.campaign.objective = document.getElementById("campObj").value;
+    state.data.campaign.start = document.getElementById("campStart").value;
+    state.data.campaign.end = document.getElementById("campEnd").value;
+    state.data.campaign.notes = document.getElementById("campNotes").value;
+    save(); render();
+  });
+  document.querySelectorAll("[data-camp-prog]").forEach(el => el.addEventListener("input", () => {
+    const s = state.data.shops.find(x => x.id === el.getAttribute("data-camp-prog"));
+    if (s) { s.campaignProgress = +el.value; el.nextElementSibling.textContent = el.value + "/3"; save(); }
+  }));
+  const addFeedback = document.getElementById("addFeedback");
+  if (addFeedback) addFeedback.addEventListener("click", () => document.getElementById("fbNew").hidden = false);
+  const saveNewFb = document.getElementById("saveNewFb");
+  if (saveNewFb) saveNewFb.addEventListener("click", () => {
+    state.data.feedback.unshift({ id: uid(), shopId: document.getElementById("fbShop").value, category: document.getElementById("fbCat").value, detail: document.getElementById("fbDetail").value, status: "open", response: "", created: isoDate() });
+    save(); render();
+  });
+  document.querySelectorAll("[data-fb-save]").forEach(btn => btn.addEventListener("click", () => {
+    const id = btn.getAttribute("data-fb-save");
+    const f = state.data.feedback.find(x => x.id === id);
+    f.status = document.querySelector(`[data-fb-status="${id}"]`).value;
+    f.response = document.querySelector(`[data-fb-resp="${id}"]`).value;
+    save(); render();
+  }));
+}
+
+function openLog(){
+  const sel = document.getElementById("logShop");
+  sel.innerHTML = state.data.shops.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join("");
+  const rung = document.getElementById("logRung");
+  rung.innerHTML = `<option value="">— no change —</option>` + RUNGS.map((n,i)=>`<option value="${i+1}">${i+1}. ${esc(n)}</option>`).join("");
+  document.getElementById("logDate").value = addDays(2);
+  document.getElementById("logOwner").value = "Brock";
+  document.getElementById("modalLog").classList.remove("hidden");
+}
+function closeLog(){ document.getElementById("modalLog").classList.add("hidden"); }
+
+function boot(){
+  state.data = load();
+  save();
+  document.getElementById("nav").addEventListener("click", e => {
+    const btn = e.target.closest("[data-view]");
+    if (!btn) return;
+    state.view = btn.getAttribute("data-view");
+    render();
+  });
+  document.getElementById("btnLog").onclick = openLog;
+  document.getElementById("closeLog").onclick = closeLog;
+  document.getElementById("cancelLog").onclick = closeLog;
+  document.getElementById("formLog").onsubmit = e => {
+    e.preventDefault();
+    const shopId = document.getElementById("logShop").value;
+    const shop = state.data.shops.find(s => s.id === shopId);
+    const rungVal = document.getElementById("logRung").value;
+    if (rungVal) shop.rung = +rungVal;
+    shop.nextStep = {
+      what: document.getElementById("logNext").value.trim(),
+      who: document.getElementById("logOwner").value.trim(),
+      date: document.getElementById("logDate").value
+    };
+    const outcome = document.getElementById("logOutcome").value;
+    const notes = document.getElementById("logNotes").value.trim();
+    state.data.conversations.unshift({
+      id: uid(), shopId, at: isoDate(), outcome, notes, rungAfter: shop.rung, next: {...shop.nextStep},
+      meaningful: true
+    });
+    if (outcome === "feedback" && notes) {
+      state.data.feedback.unshift({ id: uid(), shopId, category: "repeated requests", detail: notes, status: "open", response: "", created: isoDate() });
+    }
+    save(); closeLog(); state.view = "today"; render();
+  };
+  document.getElementById("btnExport").onclick = () => {
+    const blob = new Blob([JSON.stringify(state.data,null,2)], {type:"application/json"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "gvc-tpo-command-center.json"; a.click();
+  };
+  document.getElementById("btnImport").onclick = () => document.getElementById("importFile").click();
+  document.getElementById("importFile").onchange = async e => {
+    const file = e.target.files[0]; if (!file) return;
+    state.data = JSON.parse(await file.text()); save(); render();
+  };
+  document.getElementById("btnReset").onclick = () => {
+    if (confirm("Reset to seeded 11 shops? This clears local data.")) {
+      state.data = seedData(); save(); render();
+    }
+  };
+  render();
+}
+boot();
+</script>
+</body>
+</html>
