@@ -11,4 +11,7 @@ All state persists in browser localStorage (`gvc-tpo-command-center-v1`).
 First load seeds 11 approved TPO shops. Export/Import/Reset are in the header.
 
 ## Views
-Today, Shops, Fast Lane, Rooms, Rhythm, Campaigns, Feedback, Scoreboard.
+Today, Updates, Door-kick, Shops, Fast Lane, Rooms, Rhythm, Campaigns, Feedback, Scoreboard.
+
+## Door-kick SAMPLE rates
+Door-kick emails must never invent GVC live locks: rate/points cells default to Secondary/lock-desk tokens (e.g. `{{CONV30_RATE}}`) and are labeled “Paste from Secondary / lock desk — not Sales Desk Matrix.” Guideline-door bullets may carry longer-lived SAMPLE Matrix cues (loan limits, overlays) but are editable copy only—always lock with Secondary, and treat timestamps + the compliance footer as mandatory before anything leaves the composer.
