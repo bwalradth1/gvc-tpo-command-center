@@ -181,6 +181,57 @@ input:focus, select:focus, textarea:focus { outline: 1px solid var(--gold); bord
 .empty { padding: 28px; text-align: center; color: var(--muted); border: 1px dashed var(--border); border-radius: 8px; }
 .req { color: var(--red); }
 .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.updates-teaser {
+  border: 1px solid #6b5420;
+  background: linear-gradient(135deg, var(--navy) 0%, #152033 55%, rgba(212,168,75,.18) 100%);
+  cursor: pointer;
+  margin-bottom: 14px;
+}
+.updates-teaser:hover { border-color: var(--gold); }
+.updates-teaser h3 { margin: 0 0 4px; color: var(--gold2); font-size: 15px; }
+.updates-teaser .teaser-meta { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+.win-person { color: var(--gold2); font-weight: 600; }
+.activity-board { margin-top: 22px; }
+.activity-board > h2 {
+  margin: 0 0 6px; font-size: 17px; color: var(--gold2); font-weight: 650;
+}
+.activity-card .pillar {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--gold); font-weight: 600; margin-bottom: 4px;
+}
+.activity-card .why { color: var(--muted); font-size: 12.5px; margin: 6px 0 10px; }
+.activity-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.dk-preview {
+  background: #0a101c; border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px; font-family: var(--mono); font-size: 12px; white-space: pre-wrap;
+  max-height: 320px; overflow: auto; color: #d6e2f5;
+}
+.dk-html-preview {
+  background: #f7f4ee; color: #1a1205; border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px; max-height: 320px; overflow: auto;
+}
+.dk-html-preview table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dk-html-preview th, .dk-html-preview td {
+  border: 1px solid #c9b896; padding: 6px 8px; text-align: left;
+}
+.dk-html-preview th { background: #ebe3d3; }
+.dk-warn {
+  border: 1px solid #6b5420; background: rgba(212,168,75,.1);
+  border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; color: var(--gold2);
+  font-size: 12.5px;
+}
+.dk-doors input { font-size: 12.5px; padding: 6px 8px; }
+.volume-block { margin-top: 18px; }
+.volume-block ul { margin: 8px 0 0; padding-left: 18px; color: var(--text); }
+.volume-block li { margin: 4px 0; }
+.lane-reminder {
+  border: 1px dashed #3d5378; background: rgba(91,141,239,.08);
+  border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;
+}
+
+
+
 </style>
 </head>
 <body>
@@ -232,7 +283,7 @@ input:focus, select:focus, textarea:focus { outline: 1px solid var(--gold); bord
 <script>
 const STORAGE_KEY = "gvc-tpo-command-center-v1";
 const VIEWS = [
-  ["today","Today"],["shops","Shops"],["fastlane","Fast Lane"],["rooms","Rooms"],
+  ["today","Today"],["updates","Updates"],["doorkick","Door-kick"],["shops","Shops"],["fastlane","Fast Lane"],["rooms","Rooms"],
   ["rhythm","Rhythm"],["campaigns","Campaigns"],["feedback","Feedback"],["scoreboard","Scoreboard"]
 ];
 const RUNGS = [
@@ -373,8 +424,129 @@ function seedData(){
       { id: uid(), shopId: shops[4].id, category: "documentation friction", detail: "Bank-statement worksheet too heavy for LOAs", status: "open", response: "", created: addDays(-6) },
       { id: uid(), shopId: shops[6].id, category: "pricing objections", detail: "Lost a VA purchase on rate", status: "brought", response: "", created: addDays(-4) },
       { id: uid(), shopId: shops[2].id, category: "portal/submission friction", detail: "Condition uploads timing out", status: "closed", response: "IT patched upload timeout; retry with chrome.", created: addDays(-10) }
-    ]
+    ],
+    updates: defaultUpdates(),
+    doorKick: defaultDoorKick()
   };
+}
+
+function defaultActivities(){
+  return [
+    { id: "act-know-shop", pillar: "Know the shop", title: "Know the shop", why: "Refresh opportunity, lender loyalty, and relationship map so every call advances a file.", owner: "Inside AE / TPO Desk", cadence: "Weekly — priority shops" },
+    { id: "act-morning-4", pillar: "Know the shop", title: "Morning 4-shop plan", why: "Named daily shop lane keeps coverage tight and dated next steps current.", owner: "Inside AE / TPO Desk", cadence: "Daily — 4 named shops" },
+    { id: "act-ask-solve", pillar: "Earn the scenario", title: "Ask / Solve / Match / Teach / Advance", why: "Structured talk track turns airtime into scenarios, comparisons, and dated next steps.", owner: "Inside AE / TPO Desk", cadence: "Every meaningful broker conversation" },
+    { id: "act-approval-access", pillar: "Know the shop", title: "Approval & access", why: "Portal, AE assignment, and lock-desk access remove blockers before the first file.", owner: "Inside AE / TPO Desk", cadence: "On onboarding + any access gap" },
+    { id: "act-pipeline", pillar: "Earn the scenario", title: "Pipeline discovery", why: "Surfaces live files where GVC can compete this week.", owner: "Inside AE / TPO Desk", cadence: "2–3x / week on Priority A shops" },
+    { id: "act-loan-pricing", pillar: "Earn the scenario", title: "Loan-specific pricing compare", why: "Side-by-side on a real borrower beats generic rate talk.", owner: "Inside AE / TPO Desk", cadence: "On every scenario offered" },
+    { id: "act-product-match", pillar: "Earn the scenario", title: "Product match", why: "Match GVC product path to the broker's borrower (Conv/FHA/VA/Non-QM overlays).", owner: "Inside AE / TPO Desk", cadence: "Per scenario" },
+    { id: "act-scenario-intake", pillar: "Earn the scenario", title: "Scenario intake", why: "Capture docs, overlays, and next step so comparisons convert.", owner: "Inside AE / TPO Desk", cadence: "Same day as scenario ask" },
+    { id: "act-first-file", pillar: "Win the first file", title: "First-file concierge", why: "Remove the experiment feeling — portal help, named ops, milestone updates.", owner: "Inside AE / TPO Desk", cadence: "Every first-file commitment" },
+    { id: "act-producer-intro", pillar: "Find the producer", title: "Producer / processor intro", why: "Owners open doors; producers and processors create and push files.", owner: "Inside AE / TPO Desk", cadence: "Weekly — at least one intro ask" },
+    { id: "act-scenario-room", pillar: "Earn the scenario", title: "Scenario room", why: "Tue/Thu rooms turn live files into GVC paths with 2–3 targeted invites.", owner: "Inside AE / TPO Desk", cadence: "Before every Tue & Thu room" },
+    { id: "act-second-ask", pillar: "Ask for the second", title: "Second-loan ask", why: "One funded file should spawn the next — compounds volume per shop.", owner: "Inside AE / TPO Desk", cadence: "Within 48 hours of funding / debrief" },
+    { id: "act-dormant", pillar: "Know the shop", title: "Dormant / recovery", why: "Reopens quiet accounts before competitors lock the pipeline.", owner: "Inside AE / TPO Desk", cadence: "Weekly — no meaningful convo in 14+ days" },
+    { id: "act-campaign", pillar: "Win the first file", title: "Campaign trigger outreach", why: "Active 2-week campaign turns into dated commitments, not airtime.", owner: "Inside AE / TPO Desk", cadence: "Per campaign beat" },
+    { id: "act-vob", pillar: "Ask for the second", title: "Voice-of-broker friction", why: "Capture friction, close the loop, feed product — protects the next file.", owner: "Inside AE / TPO Desk", cadence: "Same week as any friction raised" },
+    { id: "act-doorkick", pillar: "Earn the scenario", title: "Rate-sheet door-kick (body email)", why: "Brokers ignore PDF-only sheets — 3–5 product rows in the body + CTA drive replies.", owner: "Jim/Ashley/Casey/AE", cadence: "3x/week" }
+  ];
+}
+
+function defaultUpdates(){
+  return {
+    asOf: isoDate(),
+    headline: "Task wins — Jim · Ashley · Casey",
+    wins: [
+      { person: "Jim", title: "PLACEHOLDER", detail: "Win detail pending from Broker & Wholesale" },
+      { person: "Ashley", title: "PLACEHOLDER", detail: "Win detail pending from Broker & Wholesale" },
+      { person: "Casey", title: "PLACEHOLDER", detail: "Win detail pending from Broker & Wholesale" }
+    ],
+    volumeActivities: defaultVolumeActivities(),
+    activities: defaultActivities()
+  };
+}
+
+function defaultVolumeActivities(){
+  return [
+    "Shop coverage + dated next step current by Fri AM",
+    "4 named shops/day (morning broker lane)",
+    "≥1 scenario or submission from Priority A",
+    "First-loan concierge on every commitment",
+    "One producer/processor intro",
+    "One recovery / dormant touch",
+    "Same-day CRM after every meaningful convo"
+  ];
+}
+
+function defaultDoorKick(){
+  return {
+    products: [
+      { product: "Conv 30", rate: "{{CONV30_RATE}}", points: "{{CONV30_PRICE}}", note: "" },
+      { product: "FHA 30", rate: "{{FHA30_RATE}}", points: "{{FHA30_PRICE}}", note: "" },
+      { product: "VA 30", rate: "{{VA30_RATE}}", points: "{{VA30_PRICE}}", note: "" },
+      { product: "", rate: "", points: "", note: "" },
+      { product: "", rate: "", points: "", note: "" }
+    ],
+    cta: "Reply with a borrower scenario and I'll map GVC vs your current lender by noon.",
+    subjectTemplate: "GVC rate doors for {{SHOP}} — lock with Secondary",
+    guidelines: [
+      "SAMPLE — Conforming loan-limit awareness: confirm county limits before quoting jumbo vs conforming",
+      "SAMPLE — Program overlays: FHA/VA/USDA overlays may differ from agency base — confirm with Secondary",
+      "SAMPLE — Longer-lived Matrix cue only; never paste Sales Desk Matrix as live lock pricing"
+    ],
+    attachNote: true,
+    rateBlockLabel: "Paste from Secondary / lock desk — not Sales Desk Matrix",
+    compliance: "Rates/pricing subject to change without notice. Indicative doors only until locked with Secondary / lock desk. Not a lock commitment."
+  };
+}
+
+function ensureUpdates(d){
+  if (!d.updates || !Array.isArray(d.updates.wins)) {
+    d.updates = defaultUpdates();
+  } else {
+    const people = ["Jim","Ashley","Casey"];
+    const byPerson = Object.fromEntries((d.updates.wins||[]).map(w => [w.person, w]));
+    d.updates.wins = people.map(p => byPerson[p] || { person: p, title: "PLACEHOLDER", detail: "Win detail pending from Broker & Wholesale" });
+    if (!d.updates.headline) d.updates.headline = "Task wins — Jim · Ashley · Casey";
+    if (!d.updates.asOf) d.updates.asOf = isoDate();
+  }
+  const defs = defaultActivities();
+  if (!Array.isArray(d.updates.activities) || d.updates.activities.length < defs.length) {
+    const byId = Object.fromEntries((d.updates.activities||[]).map(a => [a.id, a]));
+    d.updates.activities = defs.map(a => byId[a.id] || a);
+  } else if (!d.updates.activities.some(a => a.id === "act-doorkick")) {
+    d.updates.activities.push(defs.find(a => a.id === "act-doorkick"));
+  }
+  if (!Array.isArray(d.updates.volumeActivities) || !d.updates.volumeActivities.length) {
+    d.updates.volumeActivities = defaultVolumeActivities();
+  }
+  return ensureDoorKick(d);
+}
+
+function ensureDoorKick(d){
+  const def = defaultDoorKick();
+  if (!d.doorKick || typeof d.doorKick !== "object") {
+    d.doorKick = def;
+    return d;
+  }
+  if (!Array.isArray(d.doorKick.products) || d.doorKick.products.length < 3) {
+    d.doorKick.products = def.products;
+  } else {
+    d.doorKick.products = d.doorKick.products.map(p => ({
+      product: p.product || "",
+      rate: p.rate || "",
+      points: p.points || "",
+      note: p.note || ""
+    }));
+    while (d.doorKick.products.length < 3) d.doorKick.products.push({ product:"", rate:"", points:"", note:"" });
+    if (d.doorKick.products.length > 5) d.doorKick.products = d.doorKick.products.slice(0,5);
+  }
+  if (!d.doorKick.cta) d.doorKick.cta = def.cta;
+  if (!d.doorKick.subjectTemplate) d.doorKick.subjectTemplate = def.subjectTemplate;
+  if (!Array.isArray(d.doorKick.guidelines) || !d.doorKick.guidelines.length) d.doorKick.guidelines = def.guidelines;
+  if (typeof d.doorKick.attachNote !== "boolean") d.doorKick.attachNote = def.attachNote;
+  if (!d.doorKick.rateBlockLabel) d.doorKick.rateBlockLabel = def.rateBlockLabel;
+  if (!d.doorKick.compliance) d.doorKick.compliance = def.compliance;
+  return d;
 }
 
 function load(){
@@ -383,7 +555,7 @@ function load(){
     if (!raw) return seedData();
     const d = JSON.parse(raw);
     if (!d.shops || d.shops.length !== 11) return seedData();
-    return d;
+    return ensureUpdates(d);
   } catch { return seedData(); }
 }
 function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }
@@ -445,7 +617,7 @@ function renderNav(){
 function render(){
   renderNav();
   const main = document.getElementById("main");
-  const map = { today: renderToday, shops: renderShops, fastlane: renderFastLane, rooms: renderRooms, rhythm: renderRhythm, campaigns: renderCampaigns, feedback: renderFeedback, scoreboard: renderScoreboard };
+  const map = { today: renderToday, updates: renderUpdates, doorkick: renderDoorKick, shops: renderShops, fastlane: renderFastLane, rooms: renderRooms, rhythm: renderRhythm, campaigns: renderCampaigns, feedback: renderFeedback, scoreboard: renderScoreboard };
   main.innerHTML = (map[state.view] || renderToday)();
   bindView();
 }
@@ -453,13 +625,207 @@ function render(){
 function renderToday(){
   const tasks = buildTodayTasks();
   const red = tasks.filter(t => t.severity==="red").length;
+  const u = ensureUpdates(state.data).updates;
+  const teaserLines = (u.wins||[]).map(w => `
+      <div class="row" style="padding:8px 10px;margin:0;background:rgba(0,0,0,.22)">
+        <div class="row-main"><span class="win-person">${esc(w.person)}</span>
+          <div class="muted" style="margin-top:2px">${esc(w.title === "PLACEHOLDER" ? w.detail : (w.title + " — " + w.detail))}</div>
+        </div>
+      </div>`).join("");
   return `<div class="view-head"><div><h1>Today</h1><p>Work queue only — built from missing next steps, Fast Lane blockers, rhythm, rooms, campaign, and feedback loops.</p></div>
     <div class="pill-row"><span class="tag red">${red} red</span><span class="tag">${tasks.length} total</span></div></div>
+    <div class="lane-reminder clickable" data-goto="updates">
+      <strong>4-shop broker lane</strong>
+      <div class="muted" style="margin-top:4px">Name 4 shops for today · keep dated next steps current · same-day CRM. Open Updates for this week’s volume activities →</div>
+    </div>
+    <div class="card updates-teaser clickable" data-goto="updates">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;flex-wrap:wrap">
+        <div><h3>Updates</h3><div class="teaser-meta">${esc(isoDate())} · ${esc(u.headline||"Task wins")} · morning team brief</div></div>
+        <span class="tag gold">Open</span>
+      </div>
+      <div class="list" style="gap:6px">${teaserLines}</div>
+      <div class="muted" style="margin-top:10px;font-size:12px">Also: Drive volume — activity menu (${(u.activities||defaultActivities()).length} plays) · Door-kick →</div>
+    </div>
     <div class="list">${tasks.length? tasks.map(t => `
       <div class="row clickable" data-goto="${t.view}" data-shop="${t.shopId||""}">
         <div class="row-main"><strong>${esc(t.title)}</strong><div class="muted">${esc(t.detail)}</div></div>
         <span class="tag ${t.severity}">${t.severity==="red"?"RED":t.view}</span>
       </div>`).join("") : `<div class="empty">Queue clear. Log a conversation or advance a shop.</div>`}</div>`;
+}
+
+function renderUpdates(){
+  const u = ensureUpdates(state.data).updates;
+  const today = isoDate();
+  const activities = u.activities || defaultActivities();
+  const vol = u.volumeActivities || defaultVolumeActivities();
+  return `<div class="view-head"><div><h1>Updates</h1>
+    <p>${esc(today)}</p>
+    <p style="margin:8px 0 0;color:var(--gold2);font-weight:600;font-size:15px">${esc(u.headline||"Task wins — Jim · Ashley · Casey")}</p>
+  </div></div>
+  <p class="muted" style="margin:-4px 0 14px">This feeds the morning team brief. Win cards stay PLACEHOLDER until Broker &amp; Wholesale supplies real outcomes — do not invent personal wins.</p>
+  <div class="form-row"><label>Headline</label><input id="updHeadline" value="${esc(u.headline||"")}" /></div>
+  <div class="form-row"><label>As of</label><input id="updAsOf" type="date" value="${esc(u.asOf||today)}" /></div>
+  <div class="grid grid-3" style="margin-top:12px">${(u.wins||[]).map(w => `
+    <div class="card">
+      <h3 style="color:var(--gold2)">${esc(w.person)}</h3>
+      <div class="form-row"><label>Title (outcome)</label>
+        <input data-win-field="title" data-win-person="${esc(w.person)}" value="${esc(w.title)}" /></div>
+      <div class="form-row"><label>Detail (outcome)</label>
+        <textarea data-win-field="detail" data-win-person="${esc(w.person)}" rows="4">${esc(w.detail)}</textarea></div>
+    </div>`).join("")}</div>
+  <div class="card volume-block">
+    <h3>This week’s volume activities (unassigned — Brock assigns)</h3>
+    <p class="muted" style="margin:0">Playbook checklist — not personal win outcomes.</p>
+    <ul id="volList">${vol.map((line,i)=>`<li><input data-vol-idx="${i}" value="${esc(line)}" style="width:100%;margin-top:4px" /></li>`).join("")}</ul>
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-top:12px">
+    <button class="btn btn-primary" id="saveUpdates">Save updates</button>
+  </div>
+  <section class="activity-board">
+    <h2>Drive volume — activity menu</h2>
+    <p class="muted" style="margin:0 0 12px">Standing Broker &amp; Wholesale plays. Owner = Inside AE / TPO Desk unless noted. Aligns to: Know the shop · Find the producer · Earn the scenario · Win the first file · Ask for the second.</p>
+    <div class="grid grid-2">${activities.map(a => `
+      <div class="card activity-card">
+        <div class="pillar">${esc(a.pillar)}</div>
+        <h3 style="margin:0">${esc(a.title)}</h3>
+        <p class="why">${esc(a.why)}</p>
+        <div class="activity-meta">
+          <span class="tag gold">Owner: ${esc(a.owner)}</span>
+          <span class="tag blue">${esc(a.cadence)}</span>
+        </div>
+      </div>`).join("")}</div>
+  </section>`;
+}
+
+
+function shopNameById(id){
+  const s = state.data.shops.find(x => x.id === id);
+  return s ? s.name : "";
+}
+
+function doorKickRows(){
+  ensureDoorKick(state.data);
+  return (state.data.doorKick.products || []).slice(0,5);
+}
+
+function buildDoorKickPlain(shopName, opener, cta, subject, rows, guidelines, attachNote, asOf, compliance, rateLabel){
+  const filled = rows.filter(r => (r.product||"").trim() || (r.rate||"").trim());
+  const lines = [];
+  lines.push(opener.trim() || ("Quick doors for " + shopName + " —"));
+  lines.push("");
+  lines.push(rateLabel || "Paste from Secondary / lock desk — not Sales Desk Matrix");
+  lines.push("As of: " + (asOf || isoDate()));
+  lines.push("");
+  lines.push("Product | Rate | Points/Price | Note");
+  lines.push("------- | ---- | ------------ | ----");
+  filled.forEach(r => {
+    lines.push([r.product||"—", r.rate||"—", r.points||"—", r.note||""].join(" | "));
+  });
+  lines.push("");
+  if (guidelines && guidelines.length) {
+    lines.push("Guideline doors (longer-lived cues — SAMPLE / editable):");
+    guidelines.filter(g => (g||"").trim()).forEach(g => lines.push("• " + g.trim()));
+    lines.push("");
+  }
+  if (cta && cta.trim()) lines.push(cta.trim());
+  if (attachNote) {
+    lines.push("");
+    lines.push("(Full rate sheet attached if useful — doors above are the quick read.)");
+  }
+  lines.push("");
+  lines.push(compliance || "Rates/pricing subject to change without notice. Lock with Secondary.");
+  return lines.join("\n");
+}
+
+function buildDoorKickHtml(shopName, opener, cta, rows, guidelines, attachNote, asOf, compliance, rateLabel){
+  const filled = rows.filter(r => (r.product||"").trim() || (r.rate||"").trim());
+  const trs = filled.map(r => `<tr><td>${esc(r.product||"—")}</td><td>${esc(r.rate||"—")}</td><td>${esc(r.points||"—")}</td><td>${esc(r.note||"")}</td></tr>`).join("");
+  const gl = (guidelines||[]).filter(g => (g||"").trim()).map(g => `<li>${esc(g.trim())}</li>`).join("");
+  return `<div style="font-family:system-ui,sans-serif;font-size:14px;color:#1a1205">
+<p>${esc(opener.trim() || ("Quick doors for " + shopName + " —"))}</p>
+<p><strong>${esc(rateLabel || "Paste from Secondary / lock desk — not Sales Desk Matrix")}</strong><br/>
+<small>As of: ${esc(asOf || isoDate())}</small></p>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:560px">
+<thead><tr><th>Product</th><th>Rate</th><th>Points/Price</th><th>Note</th></tr></thead>
+<tbody>${trs}</tbody>
+</table>
+${gl ? `<p><strong>Guideline doors</strong> (SAMPLE / editable):</p><ul>${gl}</ul>` : ""}
+${cta && cta.trim() ? `<p>${esc(cta.trim())}</p>` : ""}
+${attachNote ? `<p><em>(Full rate sheet attached if useful — doors above are the quick read.)</em></p>` : ""}
+<p style="font-size:12px;color:#555">${esc(compliance || "Rates/pricing subject to change. Lock with Secondary.")}</p>
+</div>`;
+}
+
+function renderDoorKick(){
+  ensureDoorKick(state.data);
+  const dk = state.data.doorKick;
+  const shops = state.data.shops;
+  if (!state.dkShopId) state.dkShopId = shops[0].id;
+  const shop = shops.find(s => s.id === state.dkShopId) || shops[0];
+  const shopName = shop.name;
+  const rows = doorKickRows();
+  while (rows.length < 5) rows.push({ product:"", rate:"", points:"", note:"" });
+  const openerDefault = `Hi ${shop.relationships?.owner?.name || "team"} — quick GVC doors for ${shopName}:`;
+  const opener = state.dkOpener != null ? state.dkOpener : openerDefault;
+  const cta = state.dkCta != null ? state.dkCta : dk.cta;
+  const subjectTpl = state.dkSubject != null ? state.dkSubject : (dk.subjectTemplate || "").replace(/\{\{SHOP\}\}/g, shopName);
+  const asOf = state.dkAsOf || isoDate();
+  const attachNote = state.dkAttachNote != null ? state.dkAttachNote : dk.attachNote;
+  const guidelines = state.dkGuidelines != null ? state.dkGuidelines : (dk.guidelines || []).join("\n");
+  const guideArr = String(guidelines).split("\n").map(s => s.trim()).filter(Boolean);
+  const plain = buildDoorKickPlain(shopName, opener, cta, subjectTpl, rows, guideArr, attachNote, asOf, dk.compliance, dk.rateBlockLabel);
+  const html = buildDoorKickHtml(shopName, opener, cta, rows, guideArr, attachNote, asOf, dk.compliance, dk.rateBlockLabel);
+
+  return `<div class="view-head"><div><h1>Door-kick</h1>
+    <p>Paste-ready broker email with 3–5 product rows <strong>in the body</strong> + short CTA. Brokers ignore PDF-only sheets.</p>
+  </div>
+  <div class="pill-row"><span class="tag gold">Secondary / lock desk</span><span class="tag">Not Matrix live rates</span></div></div>
+
+  <div class="dk-warn"><strong>No live GVC rates here.</strong> Rate cells are tokens (e.g. {{CONV30_RATE}}). Paste real doors from Secondary / lock desk before sending. Sales Desk Matrix is not a lock source.</div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="form-row"><label>Shop</label>
+        <select id="dkShop">${shops.map(s=>`<option value="${s.id}" ${s.id===shop.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select>
+      </div>
+      <div class="form-row"><label>Subject</label><input id="dkSubject" value="${esc(subjectTpl)}" /></div>
+      <div class="form-row"><label>Opener</label><textarea id="dkOpener" rows="2">${esc(opener)}</textarea></div>
+      <div class="form-row"><label>As of (timestamp)</label><input id="dkAsOf" type="date" value="${esc(asOf)}" /></div>
+
+      <h3 style="margin-top:8px">Doors (3–5 rows)</h3>
+      <p class="muted" style="margin-top:0">${esc(dk.rateBlockLabel)}</p>
+      <table class="table dk-doors"><thead><tr><th>Product</th><th>Rate</th><th>Points/Price</th><th>Note</th></tr></thead>
+      <tbody>${rows.map((r,i)=>`<tr>
+        <td><input data-dk-row="${i}" data-dk-field="product" value="${esc(r.product)}" placeholder="e.g. Conv 30" /></td>
+        <td><input data-dk-row="${i}" data-dk-field="rate" value="${esc(r.rate)}" placeholder="{{RATE}}" /></td>
+        <td><input data-dk-row="${i}" data-dk-field="points" value="${esc(r.points)}" placeholder="{{PRICE}}" /></td>
+        <td><input data-dk-row="${i}" data-dk-field="note" value="${esc(r.note)}" /></td>
+      </tr>`).join("")}</tbody></table>
+
+      <div class="form-row" style="margin-top:10px"><label>Guideline doors (one per line — SAMPLE / longer-lived Matrix cues)</label>
+        <textarea id="dkGuidelines" rows="4">${esc(String(guidelines))}</textarea>
+      </div>
+      <div class="form-row"><label>CTA</label><textarea id="dkCta" rows="2">${esc(cta)}</textarea></div>
+      <label class="check"><input type="checkbox" id="dkAttach" ${attachNote?"checked":""}/> Include “full sheet attached” note</label>
+      <div class="muted" style="margin:8px 0 0;font-size:12px">Compliance: ${esc(dk.compliance)}</div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
+        <button class="btn" id="dkCopySubject">Copy subject</button>
+        <button class="btn" id="dkCopyPlain">Copy plain text</button>
+        <button class="btn" id="dkCopyHtml">Copy HTML</button>
+        <button class="btn btn-primary" id="dkLog">Log as door-kick</button>
+        <button class="btn btn-ghost" id="dkSaveDefaults">Save as template defaults</button>
+      </div>
+      <div class="muted" id="dkStatus" style="margin-top:8px;min-height:1.2em"></div>
+    </div>
+
+    <div class="card">
+      <h3>Live preview — plain text</h3>
+      <div class="dk-preview" id="dkPlainPreview">${esc(plain)}</div>
+      <h3 style="margin-top:14px">Live preview — HTML table</h3>
+      <div class="dk-html-preview" id="dkHtmlPreview">${html}</div>
+    </div>
+  </div>`;
 }
 
 function renderShops(){
@@ -760,7 +1126,158 @@ function bindView(){
     f.response = document.querySelector(`[data-fb-resp="${id}"]`).value;
     save(); render();
   }));
+  const saveUpdates = document.getElementById("saveUpdates");
+  if (saveUpdates) saveUpdates.addEventListener("click", () => {
+    ensureUpdates(state.data);
+    const headlineEl = document.getElementById("updHeadline");
+    const asOfEl = document.getElementById("updAsOf");
+    if (headlineEl) state.data.updates.headline = headlineEl.value.trim();
+    if (asOfEl) state.data.updates.asOf = asOfEl.value || isoDate();
+    document.querySelectorAll("[data-win-person]").forEach(el => {
+      const person = el.getAttribute("data-win-person");
+      const field = el.getAttribute("data-win-field");
+      let win = state.data.updates.wins.find(w => w.person === person);
+      if (!win) {
+        win = { person, title: "PLACEHOLDER", detail: "Win detail pending from Broker & Wholesale" };
+        state.data.updates.wins.push(win);
+      }
+      win[field] = el.value;
+    });
+    const volInputs = [...document.querySelectorAll("[data-vol-idx]")];
+    if (volInputs.length) {
+      state.data.updates.volumeActivities = volInputs.map(el => el.value.trim()).filter(Boolean);
+    }
+    save(); render();
+  });
+  bindDoorKick();
 }
+
+function dkReadForm(){
+  ensureDoorKick(state.data);
+  const shopId = document.getElementById("dkShop")?.value || state.dkShopId;
+  const shop = state.data.shops.find(s => s.id === shopId) || state.data.shops[0];
+  const rows = [];
+  for (let i = 0; i < 5; i++) {
+    const get = (f) => document.querySelector(`[data-dk-row="${i}"][data-dk-field="${f}"]`)?.value ?? "";
+    rows.push({ product: get("product"), rate: get("rate"), points: get("points"), note: get("note") });
+  }
+  const opener = document.getElementById("dkOpener")?.value ?? "";
+  const cta = document.getElementById("dkCta")?.value ?? "";
+  const subject = document.getElementById("dkSubject")?.value ?? "";
+  const asOf = document.getElementById("dkAsOf")?.value || isoDate();
+  const attachNote = !!document.getElementById("dkAttach")?.checked;
+  const guidelines = (document.getElementById("dkGuidelines")?.value || "").split("\n").map(s => s.trim()).filter(Boolean);
+  return { shop, shopId, rows, opener, cta, subject, asOf, attachNote, guidelines };
+}
+
+function dkRefreshPreview(){
+  if (!document.getElementById("dkPlainPreview")) return;
+  const f = dkReadForm();
+  const dk = state.data.doorKick;
+  state.dkShopId = f.shopId;
+  state.dkOpener = f.opener;
+  state.dkCta = f.cta;
+  state.dkSubject = f.subject;
+  state.dkAsOf = f.asOf;
+  state.dkAttachNote = f.attachNote;
+  state.dkGuidelines = f.guidelines.join("\n");
+  // live-edit products in memory (not persisted until Save defaults / Log)
+  f.rows.forEach((r,i) => { if (dk.products[i]) Object.assign(dk.products[i], r); else dk.products[i] = r; });
+  const plain = buildDoorKickPlain(f.shop.name, f.opener, f.cta, f.subject, f.rows, f.guidelines, f.attachNote, f.asOf, dk.compliance, dk.rateBlockLabel);
+  const html = buildDoorKickHtml(f.shop.name, f.opener, f.cta, f.rows, f.guidelines, f.attachNote, f.asOf, dk.compliance, dk.rateBlockLabel);
+  document.getElementById("dkPlainPreview").textContent = plain;
+  document.getElementById("dkHtmlPreview").innerHTML = html;
+}
+
+async function dkCopy(text, label){
+  const status = document.getElementById("dkStatus");
+  try {
+    await navigator.clipboard.writeText(text);
+    if (status) status.textContent = "Copied " + label + ".";
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); if (status) status.textContent = "Copied " + label + "."; }
+    catch { if (status) status.textContent = "Copy failed — select from preview."; }
+    ta.remove();
+  }
+}
+
+function bindDoorKick(){
+  if (!document.getElementById("dkShop")) return;
+  const refresh = () => dkRefreshPreview();
+  document.getElementById("dkShop").addEventListener("change", () => {
+    state.dkShopId = document.getElementById("dkShop").value;
+    state.dkOpener = null; // re-personalize opener for new shop
+    state.dkSubject = null;
+    render();
+  });
+  ["dkOpener","dkCta","dkSubject","dkAsOf","dkGuidelines"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", refresh);
+  });
+  const att = document.getElementById("dkAttach");
+  if (att) att.addEventListener("change", refresh);
+  document.querySelectorAll("[data-dk-row]").forEach(el => el.addEventListener("input", refresh));
+
+  document.getElementById("dkCopySubject")?.addEventListener("click", () => {
+    const f = dkReadForm();
+    dkCopy(f.subject, "subject");
+  });
+  document.getElementById("dkCopyPlain")?.addEventListener("click", () => {
+    const f = dkReadForm();
+    const dk = state.data.doorKick;
+    const plain = buildDoorKickPlain(f.shop.name, f.opener, f.cta, f.subject, f.rows, f.guidelines, f.attachNote, f.asOf, dk.compliance, dk.rateBlockLabel);
+    dkCopy(plain, "plain text");
+  });
+  document.getElementById("dkCopyHtml")?.addEventListener("click", () => {
+    const f = dkReadForm();
+    const dk = state.data.doorKick;
+    const html = buildDoorKickHtml(f.shop.name, f.opener, f.cta, f.rows, f.guidelines, f.attachNote, f.asOf, dk.compliance, dk.rateBlockLabel);
+    dkCopy(html, "HTML");
+  });
+  document.getElementById("dkSaveDefaults")?.addEventListener("click", () => {
+    const f = dkReadForm();
+    ensureDoorKick(state.data);
+    state.data.doorKick.products = f.rows.map(r => ({...r}));
+    state.data.doorKick.cta = f.cta;
+    state.data.doorKick.subjectTemplate = f.subject.replace(f.shop.name, "{{SHOP}}");
+    state.data.doorKick.guidelines = f.guidelines;
+    state.data.doorKick.attachNote = f.attachNote;
+    save();
+    const status = document.getElementById("dkStatus");
+    if (status) status.textContent = "Template defaults saved to localStorage.";
+  });
+  document.getElementById("dkLog")?.addEventListener("click", () => {
+    const f = dkReadForm();
+    const shop = f.shop;
+    const filled = f.rows.filter(r => (r.product||"").trim()).map(r => r.product).join(", ");
+    shop.nextStep = {
+      what: "Follow up on door-kick reply",
+      who: "Brock",
+      date: addDays(2)
+    };
+    state.data.conversations.unshift({
+      id: uid(),
+      shopId: shop.id,
+      at: isoDate(),
+      outcome: "loan_moved",
+      notes: "Door-kick body email sent (" + (filled || "rate doors") + "). Subject: " + f.subject + ". CTA: " + f.cta,
+      rungAfter: shop.rung,
+      next: {...shop.nextStep},
+      meaningful: true
+    });
+    // persist current rows as working defaults
+    ensureDoorKick(state.data);
+    state.data.doorKick.products = f.rows.map(r => ({...r}));
+    state.data.doorKick.cta = f.cta;
+    save();
+    const status = document.getElementById("dkStatus");
+    if (status) status.textContent = "Logged door-kick on " + shop.name + " · next step +2 days (Brock).";
+    else { state.view = "shops"; state.selectedShopId = shop.id; render(); }
+  });
+}
+
 
 function openLog(){
   const sel = document.getElementById("logShop");
@@ -814,7 +1331,7 @@ function boot(){
   document.getElementById("btnImport").onclick = () => document.getElementById("importFile").click();
   document.getElementById("importFile").onchange = async e => {
     const file = e.target.files[0]; if (!file) return;
-    state.data = JSON.parse(await file.text()); save(); render();
+    state.data = ensureDoorKick(ensureUpdates(JSON.parse(await file.text()))); save(); render();
   };
   document.getElementById("btnReset").onclick = () => {
     if (confirm("Reset to seeded 11 shops? This clears local data.")) {
