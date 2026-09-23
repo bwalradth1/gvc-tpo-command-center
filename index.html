@@ -190,7 +190,6 @@ input:focus, select:focus, textarea:focus { outline: 1px solid var(--gold); bord
 .updates-teaser:hover { border-color: var(--gold); }
 .updates-teaser h3 { margin: 0 0 4px; color: var(--gold2); font-size: 15px; }
 .updates-teaser .teaser-meta { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
-.win-person { color: var(--gold2); font-weight: 600; }
 .activity-board { margin-top: 22px; }
 .activity-board > h2 {
   margin: 0 0 6px; font-size: 17px; color: var(--gold2); font-weight: 650;
@@ -454,12 +453,8 @@ function defaultActivities(){
 function defaultUpdates(){
   return {
     asOf: isoDate(),
-    headline: "Task wins — Jim · Ashley · Casey",
-    wins: [
-      { person: "Jim", title: "PLACEHOLDER", detail: "Win detail pending from Broker & Wholesale" },
-      { person: "Ashley", title: "PLACEHOLDER", detail: "Win detail pending from Broker & Wholesale" },
-      { person: "Casey", title: "PLACEHOLDER", detail: "Win detail pending from Broker & Wholesale" }
-    ],
+    headline: "Drive volume — this week’s activity board",
+    wins: [],
     volumeActivities: defaultVolumeActivities(),
     activities: defaultActivities()
   };
@@ -500,15 +495,13 @@ function defaultDoorKick(){
 }
 
 function ensureUpdates(d){
-  if (!d.updates || !Array.isArray(d.updates.wins)) {
-    d.updates = defaultUpdates();
-  } else {
-    const people = ["Jim","Ashley","Casey"];
-    const byPerson = Object.fromEntries((d.updates.wins||[]).map(w => [w.person, w]));
-    d.updates.wins = people.map(p => byPerson[p] || { person: p, title: "PLACEHOLDER", detail: "Win detail pending from Broker & Wholesale" });
-    if (!d.updates.headline) d.updates.headline = "Task wins — Jim · Ashley · Casey";
-    if (!d.updates.asOf) d.updates.asOf = isoDate();
+  if (!d.updates || typeof d.updates !== "object") d.updates = defaultUpdates();
+  // Person-named win cards are retired; activity board data is the source of truth.
+  d.updates.wins = [];
+  if (!d.updates.headline || /Task wins|Jim|Ashley|Casey/i.test(d.updates.headline)) {
+    d.updates.headline = "Drive volume — this week’s activity board";
   }
+  if (!d.updates.asOf) d.updates.asOf = isoDate();
   const defs = defaultActivities();
   if (!Array.isArray(d.updates.activities) || d.updates.activities.length < defs.length) {
     const byId = Object.fromEntries((d.updates.activities||[]).map(a => [a.id, a]));
@@ -626,11 +619,9 @@ function renderToday(){
   const tasks = buildTodayTasks();
   const red = tasks.filter(t => t.severity==="red").length;
   const u = ensureUpdates(state.data).updates;
-  const teaserLines = (u.wins||[]).map(w => `
+  const teaserLines = (u.volumeActivities || defaultVolumeActivities()).slice(0, 4).map(line => `
       <div class="row" style="padding:8px 10px;margin:0;background:rgba(0,0,0,.22)">
-        <div class="row-main"><span class="win-person">${esc(w.person)}</span>
-          <div class="muted" style="margin-top:2px">${esc(w.title === "PLACEHOLDER" ? w.detail : (w.title + " — " + w.detail))}</div>
-        </div>
+        <div class="row-main"><div class="muted">${esc(line)}</div></div>
       </div>`).join("");
   return `<div class="view-head"><div><h1>Today</h1><p>Work queue only — built from missing next steps, Fast Lane blockers, rhythm, rooms, campaign, and feedback loops.</p></div>
     <div class="pill-row"><span class="tag red">${red} red</span><span class="tag">${tasks.length} total</span></div></div>
@@ -640,11 +631,11 @@ function renderToday(){
     </div>
     <div class="card updates-teaser clickable" data-goto="updates">
       <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;flex-wrap:wrap">
-        <div><h3>Updates</h3><div class="teaser-meta">${esc(isoDate())} · ${esc(u.headline||"Task wins")} · morning team brief</div></div>
+        <div><h3>Updates</h3><div class="teaser-meta">${esc(isoDate())} · ${esc(u.headline||"Drive volume — this week’s activity board")} · morning brief</div></div>
         <span class="tag gold">Open</span>
       </div>
       <div class="list" style="gap:6px">${teaserLines}</div>
-      <div class="muted" style="margin-top:10px;font-size:12px">Also: Drive volume — activity menu (${(u.activities||defaultActivities()).length} plays) · Door-kick →</div>
+      <div class="muted" style="margin-top:10px;font-size:12px">This week’s checklist from the activity board · Drive volume — activity menu (${(u.activities||defaultActivities()).length} plays) · Door-kick →</div>
     </div>
     <div class="list">${tasks.length? tasks.map(t => `
       <div class="row clickable" data-goto="${t.view}" data-shop="${t.shopId||""}">
@@ -660,19 +651,11 @@ function renderUpdates(){
   const vol = u.volumeActivities || defaultVolumeActivities();
   return `<div class="view-head"><div><h1>Updates</h1>
     <p>${esc(today)}</p>
-    <p style="margin:8px 0 0;color:var(--gold2);font-weight:600;font-size:15px">${esc(u.headline||"Task wins — Jim · Ashley · Casey")}</p>
+    <p style="margin:8px 0 0;color:var(--gold2);font-weight:600;font-size:15px">${esc(u.headline||"Drive volume — this week’s activity board")}</p>
   </div></div>
-  <p class="muted" style="margin:-4px 0 14px">This feeds the morning team brief. Win cards stay PLACEHOLDER until Broker &amp; Wholesale supplies real outcomes — do not invent personal wins.</p>
+  <p class="muted" style="margin:-4px 0 14px">The activity board is the morning brief source of truth: this week’s volume checklist plus the Drive volume activity menu. Updates does not use person-named win cards.</p>
   <div class="form-row"><label>Headline</label><input id="updHeadline" value="${esc(u.headline||"")}" /></div>
   <div class="form-row"><label>As of</label><input id="updAsOf" type="date" value="${esc(u.asOf||today)}" /></div>
-  <div class="grid grid-3" style="margin-top:12px">${(u.wins||[]).map(w => `
-    <div class="card">
-      <h3 style="color:var(--gold2)">${esc(w.person)}</h3>
-      <div class="form-row"><label>Title (outcome)</label>
-        <input data-win-field="title" data-win-person="${esc(w.person)}" value="${esc(w.title)}" /></div>
-      <div class="form-row"><label>Detail (outcome)</label>
-        <textarea data-win-field="detail" data-win-person="${esc(w.person)}" rows="4">${esc(w.detail)}</textarea></div>
-    </div>`).join("")}</div>
   <div class="card volume-block">
     <h3>This week’s volume activities (unassigned — Brock assigns)</h3>
     <p class="muted" style="margin:0">Playbook checklist — not personal win outcomes.</p>
@@ -1133,16 +1116,7 @@ function bindView(){
     const asOfEl = document.getElementById("updAsOf");
     if (headlineEl) state.data.updates.headline = headlineEl.value.trim();
     if (asOfEl) state.data.updates.asOf = asOfEl.value || isoDate();
-    document.querySelectorAll("[data-win-person]").forEach(el => {
-      const person = el.getAttribute("data-win-person");
-      const field = el.getAttribute("data-win-field");
-      let win = state.data.updates.wins.find(w => w.person === person);
-      if (!win) {
-        win = { person, title: "PLACEHOLDER", detail: "Win detail pending from Broker & Wholesale" };
-        state.data.updates.wins.push(win);
-      }
-      win[field] = el.value;
-    });
+    state.data.updates.wins = [];
     const volInputs = [...document.querySelectorAll("[data-vol-idx]")];
     if (volInputs.length) {
       state.data.updates.volumeActivities = volInputs.map(el => el.value.trim()).filter(Boolean);
