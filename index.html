@@ -238,7 +238,7 @@ input:focus, select:focus, textarea:focus { outline: 1px solid var(--gold); bord
   <header class="topbar">
     <div class="brand">
       <div class="brand-mark">GVC</div>
-      <div><strong>TPO Command Center</strong><span>Internal broker OS · 11 approved shops</span></div>
+      <div><strong>TPO Command Center</strong><span id="bookBadge">Internal broker OS · 18 Active</span></div>
     </div>
     <p class="op-sentence">Know the shop. Find the producer. Earn the scenario. Win the first file. Ask for the second.</p>
     <div class="top-actions">
@@ -315,70 +315,68 @@ function parseDate(s){ return s ? new Date(s+"T12:00:00") : null; }
 function isPast(s){ const d=parseDate(s); return d && d < new Date(new Date().toDateString()); }
 function weekday(){ return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date().getDay()]; }
 
-function seedShops(){
-  const base = [
-    ["Horizon Home Lending","Carmel, IN",2],
-    ["Keystone Mortgage Group","Indianapolis, IN",4],
-    ["Northbridge Brokers","Fort Wayne, IN",6],
-    ["Summit Street Lending","Fishers, IN",3],
-    ["Prairie State Mortgage","Bloomington, IN",1],
-    ["Lakeside Loan Partners","South Bend, IN",5],
-    ["Capitol Avenue Home Loans","Anderson, IN",7],
-    ["Maple & Main Mortgage","Muncie, IN",2],
-    ["River Bend Funding","Evansville, IN",8],
-    ["Crossroads Brokerage","Lafayette, IN",3],
-    ["Pendleton Peak Lending","Pendleton, IN",9]
-  ];
-  const people = [
-    [["Dana Whitfield","Owner"],["Marcus Lee","LO"],["Priya Shah","LO"],["Elena Ruiz","Processor"]],
-    [["Tom Harlan","Owner"],["Jamie Cole","LO"],["Noah Price","LO"],["Kim Orth","LOA"]],
-    [["Sara Nguyen","Owner"],["Chris Bell","LO"],["Ava Monroe","LO"],["Rick Hale","Ops"]],
-    [["Brett Owens","Owner"],["Lila Grant","LO"],["Omar Diaz","LO"],["Nancy Pike","Processor"]],
-    [["Helen Cho","Owner"],["Drew Samuels","LO"],["Maya Trent","LO"],["Gus Klein","LOA"]],
-    [["Ian Brooks","Owner"],["Tara Quinn","LO"],["Ben Asher","LO"],["Jill Mooney","Ops"]],
-    [["Carol Vance","Owner"],["Pete Romano","LO"],["Zoe Hart","LO"],["Ann Keller","Processor"]],
-    [["Greg Mills","Owner"],["Sasha Ford","LO"],["Evan Moss","LO"],["Dee Patel","LOA"]],
-    [["Nina Ortega","Owner"],["Kyle Reed","LO"],["Hannah Wu","LO"],["Paul Greer","Ops"]],
-    [["Ray Simmons","Owner"],["Ivy Chen","LO"],["Jordan Blake","LO"],["Meg Stanton","Processor"]],
-    [["Alex Voyles","Owner"],["Casey Dunn","LO"],["Riley Parks","LO"],["Pat Gomez","LOA"]]
-  ];
-  const lenders = ["Rocket/UWM mix","Local CU + UWM","PennyMac heavy","UWM exclusive habit","Mixed retail/broker","Freedom + UWM","Local bank loyalty","Newrez primary","Self-serve portals","Wholesale patchwork","GVC + backup"];
-  const opps = ["Self-employed DSCR gaps","Investor cash-out","Thin-file FTHB","Rural USDA overlays","Credit-event purchase","Non-QM bridge","Condo warrantability","Bank statement loans","VA IRRRL + purchase","Jumbo near limits","Second home quirks"];
+const ACTIVE_SHOP_COUNT = 18;
 
-  return base.map((b,i)=>{
-    const p = people[i];
-    const rung = b[2];
-    const funded = rung >= 8;
-    const hasNext = i !== 4 && i !== 7; // two red shops missing dated next step
+function seedShops(){
+  // Optimal Blue Active wholesale book only. Pending/pipeline shops are not approved coverage.
+  // Rungs stay low (1–3): coverage is not yet earned. No invented fundings, losses, or scores.
+  const book = [
+    { name:"Affinity Home Lending LLC", city:"Atlanta / Southeast", owner:"John Sock", phone:"(404) 418-7547", nmls:"1181151", approved:"08/26/2026", rung:2 },
+    { name:"KBA Group LLC", city:"Sarasota / Gulf Coast FL", owner:"Kenneth Benitez Aulet", phone:"(941) 264-9052", nmls:"2349538", approved:"04/28/2026", rung:2 },
+    { name:"LBC Solutions, Inc", city:"Los Angeles / Southern CA", owner:"Aleksandr Shekhtman", phone:"(818) 309-2999", nmls:"275599", approved:"08/19/2026", rung:2 },
+    { name:"MCK Lending Group, LLC", city:"Sarasota / Gulf Coast FL", owner:"Mark Kach", phone:"(941) 313-4000", nmls:"1649216", approved:"08/25/2026", rung:2 },
+    { name:"Milestone Mortgage Soultions LLC", city:"Massachusetts / New England", owner:"Vernon Miles", phone:"(508) 356-5262", nmls:"1815656", approved:"03/15/2026", rung:2 },
+    { name:"Sarasota Mortgage Group, LLC", city:"Sarasota / Gulf Coast FL", owner:"Jeanine Thomas", phone:"(941) 809-7484", nmls:"2556362", approved:"08/25/2026", rung:2 },
+    { name:"South Wind Financial, Inc", city:"Las Vegas / Nevada", owner:"Sandra Menard", phone:"(702) 876-3600", nmls:"9462", approved:"08/26/2026", rung:2 },
+    { name:"Stonegate Mortgage Associates, Inc.", city:"Boston / Massachusetts", owner:"Thomas Quann", phone:"508-586-7700", nmls:"1223", approved:"02/17/2026", rung:3 },
+    { name:"The Living Mortgage Group, LLC", city:"Tampa Bay / Florida", owner:"Ana Germeroth", phone:"(813) 895-0118", nmls:"2436394", approved:"07/28/2026", rung:2 },
+    { name:"VEMA Mortgage LLC", city:"Detroit / Michigan", owner:"Chirag Rachhadia", phone:"(248) 251-6564", nmls:"1019911", approved:"08/26/2026", rung:2 },
+    { name:"Verasol Lending Solutions, LLC", city:"Orlando / Central Florida", owner:"Jason Ziegler", phone:"(407) 544-0004", nmls:"2600337", approved:"08/26/2026", rung:2 },
+    { name:"Express Loan Process, Inc", city:"Snellville, GA", owner:"James Janczy", phone:"(678) 360-3452", nmls:"161951", approved:"09/15/2026", rung:1 },
+    { name:"Mortgages & More, LLC", city:"Winter Haven, FL", owner:"James Janczy", phone:"(863) 296-7181", nmls:"2323345", approved:"09/15/2026", rung:1 },
+    { name:"1st Choice Financial, Inc.", city:"Miami, FL", owner:"James Janczy", phone:"(917) 981-0913", nmls:"2597847", approved:"09/09/2026", rung:1 },
+    { name:"Easy Mortgage LLC", city:"Cape Coral, FL", owner:"James Janczy", phone:"(239) 333-5431", nmls:"1666459", approved:"09/09/2026", rung:1 },
+    { name:"OrangePath Financial Inc.", city:"Duluth, GA", owner:"James Janczy", phone:"(678) 337-8805", nmls:"2070941", approved:"09/09/2026", rung:1 },
+    { name:"Team Legacy Capital LLC", city:"Rutherford, NJ", owner:"James Janczy", phone:"(551) 278-5855", nmls:"2817705", approved:"09/09/2026", rung:1 },
+    { name:"Ward Kilduff Mortgage, LLC", city:"Canton, CT", owner:"James Janczy", phone:"(860) 658-7100", nmls:"64369", approved:"03/25/2026", rung:1 }
+  ];
+  return book.map((b,i)=>{
+    const hasNext = i !== 4 && i !== 14; // two shops missing a dated next step so Today still flags gaps
     return {
-      id: "shop-"+ (i+1),
-      name: b[0], city: b[1], rung,
+      id: "shop-"+(i+1),
+      name: b.name,
+      city: b.city,
+      status: "Active",
+      nmls: b.nmls,
+      approved: b.approved,
+      phone: b.phone,
+      rung: b.rung,
       relationships: {
-        owner: { name: p[0][0], role: p[0][1] },
-        lo1: { name: p[1][0], role: p[1][1] },
-        lo2: { name: p[2][0], role: p[2][1] },
-        ops: { name: p[3][0], role: p[3][1] }
+        owner: { name: b.owner, role: "Owner" },
+        lo1: { name: "", role: "LO" },
+        lo2: { name: "", role: "LO" },
+        ops: { name: "", role: "Ops" }
       },
-      opportunity: opps[i],
-      lenderLoyalty: lenders[i],
+      opportunity: "",
+      lenderLoyalty: "",
       nextStep: hasNext ? {
-        what: rung < 4 ? "Book discovery / producer intro" : rung < 6 ? "Run GVC comparison on live file" : rung < 8 ? "Push submission / clear conditions" : "Ask for second loan",
-        who: i % 2 ? "Brock" : p[0][0],
-        date: addDays((i % 5) - 1)
+        what: "Book owner coverage call",
+        who: "Brock",
+        date: addDays((i % 5) + 1)
       } : { what: "", who: "", date: "" },
       fastLane: {
-        scenarioReview: rung >= 4,
-        comparison: rung >= 5,
-        portalHelp: rung >= 6,
-        opsContact: rung >= 6,
-        milestones: rung >= 7,
-        debrief: funded,
-        secondAsk: rung >= 9
+        scenarioReview: false,
+        comparison: false,
+        portalHelp: false,
+        opsContact: false,
+        milestones: false,
+        debrief: false,
+        secondAsk: false
       },
-      campaignProgress: i % 3,
+      campaignProgress: 0,
       conversations: [],
-      losses: rung === 3 ? [{ reason: "Pricing lost to UWM special", date: addDays(-12) }] : [],
-      fundings: funded ? [{ date: addDays(-20), secondAsk: rung >= 9 }] : []
+      losses: [],
+      fundings: []
     };
   });
 }
@@ -390,20 +388,10 @@ function seedData(){
   return {
     version: 1,
     shops,
-    conversations: [
-      { id: uid(), shopId: shops[1].id, at: addDays(-1), outcome: "loan_moved", notes: "Scenario on self-employed borrower; docs list agreed.", rungAfter: 4, next: shops[1].nextStep, meaningful: true },
-      { id: uid(), shopId: shops[2].id, at: addDays(-2), outcome: "loan_moved", notes: "Portal walkthrough with ops.", rungAfter: 6, next: shops[2].nextStep, meaningful: true }
-    ],
+    conversations: [],
     rooms: [
-      { id: "room-tue", label: "Tue 11:00–11:30", day: "Tue", invites: [
-        { shopId: shops[1].id, person: "Jamie Cole" },
-        { shopId: shops[3].id, person: "Lila Grant" },
-        { shopId: shops[5].id, person: "Tara Quinn" }
-      ], known: "Two purchase files with income complexity", needsConfirm: "Property type / condo questionnaire", gvcPath: "Likely on bank-statement option", owner: "Brock", hearBack: addDays(2) },
-      { id: "room-thu", label: "Thu 11:00–11:30", day: "Thu", invites: [
-        { shopId: shops[0].id, person: "Marcus Lee" },
-        { shopId: shops[9].id, person: "Ivy Chen" }
-      ], known: "", needsConfirm: "", gvcPath: "", owner: "", hearBack: "" }
+      { id: "room-tue", label: "Tue 11:00–11:30", day: "Tue", invites: [], known: "", needsConfirm: "", gvcPath: "", owner: "", hearBack: "" },
+      { id: "room-thu", label: "Thu 11:00–11:30", day: "Thu", invites: [], known: "", needsConfirm: "", gvcPath: "", owner: "", hearBack: "" }
     ],
     rhythm: {
       weekOf: isoDate(),
@@ -419,11 +407,7 @@ function seedData(){
       objective: "One submission commitment from each shop not yet funded",
       notes: "Use Fast Lane invite verbatim."
     },
-    feedback: [
-      { id: uid(), shopId: shops[4].id, category: "documentation friction", detail: "Bank-statement worksheet too heavy for LOAs", status: "open", response: "", created: addDays(-6) },
-      { id: uid(), shopId: shops[6].id, category: "pricing objections", detail: "Lost a VA purchase on rate", status: "brought", response: "", created: addDays(-4) },
-      { id: uid(), shopId: shops[2].id, category: "portal/submission friction", detail: "Condition uploads timing out", status: "closed", response: "IT patched upload timeout; retry with chrome.", created: addDays(-10) }
-    ],
+    feedback: [],
     updates: defaultUpdates(),
     doorKick: defaultDoorKick()
   };
@@ -542,12 +526,20 @@ function ensureDoorKick(d){
   return d;
 }
 
+function isCurrentBook(shops){
+  if (!Array.isArray(shops) || shops.length !== ACTIVE_SHOP_COUNT) return false;
+  const expected = seedShops().map(s => s.name).sort();
+  const actual = shops.map(s => s.name).sort();
+  return expected.every((n,i) => n === actual[i]);
+}
+
 function load(){
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return seedData();
     const d = JSON.parse(raw);
-    if (!d.shops || d.shops.length !== 11) return seedData();
+    // Replace a saved book that is not these 18 Active brokers.
+    if (!isCurrentBook(d.shops)) return seedData();
     return ensureUpdates(d);
   } catch { return seedData(); }
 }
@@ -607,8 +599,14 @@ function renderNav(){
   ).join("");
 }
 
+function activeShopCount(){
+  return (state.data.shops || []).filter(s => (s.status || "Active") === "Active").length;
+}
+
 function render(){
   renderNav();
+  const badge = document.getElementById("bookBadge");
+  if (badge) badge.textContent = "Internal broker OS · " + activeShopCount() + " Active";
   const main = document.getElementById("main");
   const map = { today: renderToday, updates: renderUpdates, doorkick: renderDoorKick, shops: renderShops, fastlane: renderFastLane, rooms: renderRooms, rhythm: renderRhythm, campaigns: renderCampaigns, feedback: renderFeedback, scoreboard: renderScoreboard };
   main.innerHTML = (map[state.view] || renderToday)();
@@ -817,20 +815,32 @@ function renderShops(){
   const s = shops.find(x => x.id === state.selectedShopId) || shops[0];
   const list = shops.map(sh => {
     const red = !hasDatedNext(sh);
+    const active = (sh.status || "Active") === "Active";
     return `<div class="shop-item ${sh.id===s.id?"active":""}" data-select-shop="${sh.id}">
       <strong>${esc(sh.name)}</strong>
-      <div class="muted">${esc(sh.city)} · R${sh.rung} ${esc(rungName(sh.rung))}</div>
+      <div class="muted">${esc(sh.city)} · NMLS ${esc(sh.nmls||"—")} · Approved ${esc(sh.approved||"—")}</div>
+      <div class="muted">R${sh.rung} ${esc(rungName(sh.rung))}${sh.phone?" · "+esc(sh.phone):""}</div>
+      ${active?`<span class="tag green">Active</span>`:""}
       ${red?`<span class="tag red">No next step</span>`:`<span class="tag">${esc(sh.nextStep.date)}</span>`}
     </div>`;
   }).join("");
   const r = s.relationships;
-  return `<div class="view-head"><div><h1>Shops</h1><p>Commitment ladder + relationship map. Target 3+ people per shop.</p></div></div>
+  const producersMapped = [r.lo1, r.lo2, r.ops].some(p => p && p.name && p.name.trim());
+  return `<div class="view-head"><div><h1>Shops</h1><p>Commitment ladder + relationship map. Target 3+ people per shop. Approved wholesale coverage only.</p></div>
+    <div class="pill-row"><span class="tag green">${activeShopCount()} Active</span></div></div>
   <div class="split">
     <div class="card" style="padding:8px;max-height:70vh;overflow:auto">${list}</div>
     <div class="card" id="shopDetail">
       <div style="display:flex;justify-content:space-between;gap:8px;align-items:start">
-        <div><h3 style="font-size:18px;margin:0">${esc(s.name)}</h3><div class="muted">${esc(s.city)}</div></div>
+        <div><h3 style="font-size:18px;margin:0">${esc(s.name)}</h3><div class="muted">${esc(s.city)} · ${esc(s.phone||"")}</div></div>
+        <span class="tag green">${esc(s.status||"Active")}</span>
         <span class="tag gold">Rung ${s.rung}: ${esc(rungName(s.rung))}</span>
+      </div>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="form-row"><label>NMLS</label><input id="shopNmls" value="${esc(s.nmls||"")}" /></div>
+        <div class="form-row"><label>Approved</label><input id="shopApproved" value="${esc(s.approved||"")}" placeholder="MM/DD/YYYY" /></div>
+        <div class="form-row"><label>Phone</label><input id="shopPhone" value="${esc(s.phone||"")}" /></div>
+        <div class="form-row"><label>Status</label><input id="shopStatus" value="${esc(s.status||"Active")}" /></div>
       </div>
       <div class="ladder">${RUNGS.map((name,i)=>`<span class="rung ${i+1===s.rung?"on":(i+1<s.rung?"done":"")}">${i+1}. ${esc(name)}</span>`).join("")}</div>
       <div class="form-row" style="margin-top:12px"><label>Ladder rung</label>
@@ -838,6 +848,7 @@ function renderShops(){
       </div>
       <h3 style="margin-top:16px">Relationship map</h3>
       <p class="muted" style="margin-top:0">Owner opener: “${esc(OWNER_OPENER)}”</p>
+      ${producersMapped?"":`<p class="muted">Owner on file. Producers and ops are not mapped yet.</p>`}
       <div class="form-grid">
         <div class="form-row"><label>Owner / decision-maker</label><input id="relOwner" value="${esc(r.owner.name)}" /></div>
         <div class="form-row"><label>Producing LO 1</label><input id="relLo1" value="${esc(r.lo1.name)}" /></div>
@@ -998,10 +1009,13 @@ function renderScoreboard(){
     const pct = Math.min(100, Math.round((val/goal)*100));
     return `<div class="kpi"><div class="n">${val}<span class="muted" style="font-size:14px"> / ${goal}</span></div><div class="l">${esc(label)}</div><div class="bar" style="margin-top:8px"><span style="width:${pct}%"></span></div></div>`;
   };
-  return `<div class="view-head"><div><h1>Scoreboard</h1><p>30-day movement — not airtime.</p></div></div>
+  const activeN = activeShopCount();
+  return `<div class="view-head"><div><h1>Scoreboard</h1><p>30-day movement — not airtime.</p></div>
+    <div class="pill-row"><span class="tag green">${activeN} Active</span></div></div>
   <div class="grid grid-3" style="margin-bottom:12px">
-    ${meter("Shops with dated next step", withNext, 11)}
-    ${meter("Shops with 3+ relationships", relOk, 11)}
+    <div class="kpi"><div class="n">${activeN}</div><div class="l">Active approved shops</div></div>
+    ${meter("Shops with dated next step", withNext, activeN)}
+    ${meter("Shops with 3+ relationships", relOk, activeN)}
     ${meter("Meaningful convos / week", convos.length, 15)}
     ${meter("Scenarios in motion (rung≥4)", scenarios, 8)}
     ${meter("Comparisons done", comparisons, 4)}
@@ -1040,6 +1054,10 @@ function bindView(){
     const s = state.data.shops.find(x => x.id === state.selectedShopId);
     if (!s) return;
     s.rung = +document.getElementById("shopRung").value;
+    s.nmls = document.getElementById("shopNmls").value.trim();
+    s.approved = document.getElementById("shopApproved").value.trim();
+    s.phone = document.getElementById("shopPhone").value.trim();
+    s.status = document.getElementById("shopStatus").value.trim() || "Active";
     s.relationships.owner.name = document.getElementById("relOwner").value.trim();
     s.relationships.lo1.name = document.getElementById("relLo1").value.trim();
     s.relationships.lo2.name = document.getElementById("relLo2").value.trim();
@@ -1308,7 +1326,7 @@ function boot(){
     state.data = ensureDoorKick(ensureUpdates(JSON.parse(await file.text()))); save(); render();
   };
   document.getElementById("btnReset").onclick = () => {
-    if (confirm("Reset to seeded 11 shops? This clears local data.")) {
+    if (confirm("Reset to seeded 18 Active shops? This clears local data.")) {
       state.data = seedData(); save(); render();
     }
   };

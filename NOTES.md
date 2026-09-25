@@ -8,7 +8,7 @@ Open `index.html` in a desktop browser, or:
 
 ## Data
 All state persists in browser localStorage (`gvc-tpo-command-center-v1`).
-First load seeds 11 approved TPO shops. Export/Import/Reset are in the header.
+First load seeds 18 Active approved wholesale shops (Optimal Blue Active book). Pending shops are not included. Export/Import/Reset are in the header. A saved book that is not exactly 18 Active shops is replaced by this seed.
 
 ## Views
 Today, Updates, Door-kick, Shops, Fast Lane, Rooms, Rhythm, Campaigns, Feedback, Scoreboard.
